@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI SEO Publisher 實作完成報告</title>
+    <style>
+      body { margin: 0; font-family: Arial, "Microsoft JhengHei", sans-serif; color: #18212f; background: #f6f7f9; }
+      main { max-width: 1080px; margin: 0 auto; padding: 32px 20px 56px; }
+      h1 { margin: 0 0 8px; font-size: 30px; }
+      h2 { margin-top: 28px; font-size: 20px; }
+      p, li { line-height: 1.7; }
+      .meta { color: #5d6878; margin-bottom: 24px; }
+      .panel { background: #fff; border: 1px solid #dfe4ea; border-radius: 8px; padding: 20px; margin: 16px 0; }
+      .ok { color: #0f766e; font-weight: 700; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+      .item { border: 1px solid #dfe4ea; border-radius: 8px; padding: 14px; background: #fbfcfd; }
+      svg { width: 100%; height: auto; background: #fff; border: 1px solid #dfe4ea; border-radius: 8px; }
+      code { background: #eef1f5; padding: 2px 5px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>AI SEO Publisher 實作完成報告</h1>
+      <div class="meta">時間：2026-07-03 19:55 Asia/Taipei｜作者：Codex｜專案：ai-seo-publisher</div>
+
+      <section class="panel">
+        <h2>目前里程碑</h2>
+        <p class="ok">核心 Demo 已實作完成，後端測試通過，前端 production build 通過。</p>
+      </section>
+
+      <section class="panel">
+        <h2>目前情況</h2>
+        <p>專案現在包含 React SPA、FastAPI API、LLM structured output、rule-based critic、one-time reflective repair、HTML sanitizer、WordPress REST client、SQLite job repository、README 與環境範例。</p>
+      </section>
+
+      <section>
+        <h2>實作流程圖</h2>
+        <svg viewBox="0 0 980 440" role="img" aria-label="Implemented request lifecycle">
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#334155"></path>
+            </marker>
+          </defs>
+          <rect x="30" y="55" width="170" height="80" rx="8" fill="#e8f4ff" stroke="#5aa0d8"></rect>
+          <text x="115" y="88" text-anchor="middle" font-size="15" font-weight="700">React Form</text>
+          <text x="115" y="112" text-anchor="middle" font-size="12">Zod + Toast</text>
+
+          <rect x="260" y="55" width="170" height="80" rx="8" fill="#edf7ed" stroke="#62a36f"></rect>
+          <text x="345" y="88" text-anchor="middle" font-size="15" font-weight="700">FastAPI</text>
+          <text x="345" y="112" text-anchor="middle" font-size="12">Pydantic validation</text>
+
+          <rect x="490" y="45" width="190" height="100" rx="8" fill="#fff7e6" stroke="#d29a33"></rect>
+          <text x="585" y="78" text-anchor="middle" font-size="15" font-weight="700">Workflow Service</text>
+          <text x="585" y="102" text-anchor="middle" font-size="12">Job status + orchestration</text>
+          <text x="585" y="124" text-anchor="middle" font-size="12">single request lifecycle</text>
+
+          <rect x="760" y="55" width="170" height="80" rx="8" fill="#fff0ef" stroke="#d16b61"></rect>
+          <text x="845" y="88" text-anchor="middle" font-size="15" font-weight="700">WordPress</text>
+          <text x="845" y="112" text-anchor="middle" font-size="12">draft post</text>
+
+          <rect x="165" y="245" width="170" height="80" rx="8" fill="#f8eef5" stroke="#c2699b"></rect>
+          <text x="250" y="278" text-anchor="middle" font-size="15" font-weight="700">LLM Service</text>
+          <text x="250" y="302" text-anchor="middle" font-size="12">mock / compatible API</text>
+
+          <rect x="405" y="245" width="180" height="80" rx="8" fill="#eef8f8" stroke="#5ca3a3"></rect>
+          <text x="495" y="278" text-anchor="middle" font-size="15" font-weight="700">Critic + Repair</text>
+          <text x="495" y="302" text-anchor="middle" font-size="12">keywords / HTML checks</text>
+
+          <rect x="655" y="245" width="170" height="80" rx="8" fill="#f0efff" stroke="#8276d8"></rect>
+          <text x="740" y="278" text-anchor="middle" font-size="15" font-weight="700">SQLite</text>
+          <text x="740" y="302" text-anchor="middle" font-size="12">job log</text>
+
+          <line x1="200" y1="95" x2="260" y2="95" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="430" y1="95" x2="490" y2="95" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="680" y1="95" x2="760" y2="95" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="535" y1="145" x2="285" y2="245" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="585" y1="145" x2="505" y2="245" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="640" y1="145" x2="730" y2="245" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"></line>
+        </svg>
+      </section>
+
+      <section class="panel">
+        <h2>完成項目</h2>
+        <div class="grid">
+          <div class="item"><strong>Frontend</strong><p>React Hook Form、Zod、TanStack Query、Toast、Loading、結果卡片。</p></div>
+          <div class="item"><strong>Backend</strong><p>FastAPI route、Pydantic schema、CORS、統一錯誤格式。</p></div>
+          <div class="item"><strong>LLM</strong><p>JSON structured output、mock mode、OpenAI-compatible mode、timeout retry。</p></div>
+          <div class="item"><strong>WordPress</strong><p>Application Password Basic Auth、draft post、auth / unavailable error mapping。</p></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>驗證狀態</h2>
+        <ul>
+          <li><code>backend\.venv\Scripts\python.exe -m pytest backend\tests</code>：5 passed。</li>
+          <li><code>npm run build</code>：TypeScript + Vite production build passed。</li>
+          <li><code>python -m compileall backend\app</code>：後端語法編譯通過。</li>
+          <li><code>backend\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --port 8000</code>：startup complete。</li>
+          <li><code>npm run dev</code>：Vite dev server ready at <code>http://127.0.0.1:5173/</code>。</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>下一步方向</h2>
+        <p>接下來只需要設定實際 WordPress Application Password 與 LLM provider，跑一次端到端 Demo，並準備 10-15 分鐘簡報講解資料流、error handling、critic / repair 與 WordPress REST API 的角色。</p>
+      </section>
+    </main>
+  </body>
+</html>

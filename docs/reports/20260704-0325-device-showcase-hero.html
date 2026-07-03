@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Device Showcase Hero Redesign</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, "Noto Sans TC", sans-serif;
+      color: #1f2937;
+      background: #ffffff;
+      line-height: 1.55;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+    }
+
+    header {
+      border-bottom: 2px solid #d8dee8;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.2;
+    }
+
+    h2 {
+      border-bottom: 1px solid #d8dee8;
+      font-size: 20px;
+      margin-top: 32px;
+      padding-bottom: 8px;
+    }
+
+    .meta {
+      color: #64748b;
+      display: grid;
+      gap: 4px;
+      font-size: 14px;
+    }
+
+    .status {
+      background: #f8fafc;
+      border-left: 4px solid #0f766e;
+      margin: 20px 0;
+      padding: 14px 16px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th,
+    td {
+      border: 1px solid #d8dee8;
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f8fafc;
+    }
+
+    code {
+      background: #f8fafc;
+      border: 1px solid #d8dee8;
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Device Showcase Hero Redesign</h1>
+      <div class="meta">
+        <div><strong>Milestone:</strong> Reference-image-inspired hero update</div>
+        <div><strong>Project:</strong> AI SEO Publisher</div>
+        <div><strong>Generated:</strong> 2026-07-04 03:25 Asia/Taipei</div>
+        <div><strong>Author:</strong> Codex</div>
+      </div>
+    </header>
+
+    <section class="status">
+      <strong>Status:</strong> 完成白底、明亮、裝置展示感 hero 改版，風格更接近使用者提供的桌機/平板/手機 mockup 參考圖。
+    </section>
+
+    <section>
+      <h2>Current Situation</h2>
+      <p>前一版已是白色明亮主題，但主視覺仍偏抽象 dashboard。這次改成大型桌機、平板、手機的響應式網站展示圖，並調整 hero 版面讓裝置成為主角。</p>
+    </section>
+
+    <section>
+      <h2>Design Decisions</h2>
+      <ul>
+        <li>重繪 <code>frontend/public/ai-seo-hero.png</code>，改成類似參考圖的 device showcase。</li>
+        <li>首頁改為上方導覽列、中央標題、下方大型裝置 mockup 的白底構圖。</li>
+        <li>新增 <code>hero-title</code>、<code>hero-device</code>、<code>hero-copy</code> 自訂 CSS，避免 dev server 的 Tailwind HMR 狀態影響 hero 尺寸。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Changed Files</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>frontend/public/ai-seo-hero.png</code></td>
+            <td>新的桌機、平板、手機 mockup 主視覺。</td>
+          </tr>
+          <tr>
+            <td><code>frontend/src/App.tsx</code></td>
+            <td>調整首頁 hero 構圖與導覽列。</td>
+          </tr>
+          <tr>
+            <td><code>frontend/src/styles.css</code></td>
+            <td>新增穩定 hero 尺寸樣式。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Verification</h2>
+      <p>已執行 <code>npm run build</code> 成功。已在瀏覽器檢查桌面與 390px 手機寬度，確認裝置 mockup、標題、表單入口正常顯示。</p>
+    </section>
+  </main>
+</body>
+</html>

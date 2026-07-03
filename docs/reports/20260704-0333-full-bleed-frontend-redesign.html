@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Full Bleed Frontend Redesign</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, "Noto Sans TC", sans-serif;
+      color: #1f2937;
+      background: #ffffff;
+      line-height: 1.55;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+    }
+
+    header {
+      border-bottom: 2px solid #d8dee8;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.2;
+    }
+
+    h2 {
+      border-bottom: 1px solid #d8dee8;
+      font-size: 20px;
+      margin-top: 32px;
+      padding-bottom: 8px;
+    }
+
+    .meta {
+      color: #64748b;
+      display: grid;
+      gap: 4px;
+      font-size: 14px;
+    }
+
+    .status {
+      background: #f8fafc;
+      border-left: 4px solid #0f766e;
+      margin: 20px 0;
+      padding: 14px 16px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th,
+    td {
+      border: 1px solid #d8dee8;
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f8fafc;
+    }
+
+    code {
+      background: #f8fafc;
+      border: 1px solid #d8dee8;
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Full Bleed Frontend Redesign</h1>
+      <div class="meta">
+        <div><strong>Milestone:</strong> Modern full-bleed frontend rebuilt</div>
+        <div><strong>Project:</strong> AI SEO Publisher</div>
+        <div><strong>Generated:</strong> 2026-07-04 03:33 Asia/Taipei</div>
+        <div><strong>Author:</strong> Codex</div>
+      </div>
+    </header>
+
+    <section class="status">
+      <strong>Status:</strong> 完成現代滿版前端重製，重新生成明亮主視覺，深灰只作為右側背景與產品 UI 點綴。
+    </section>
+
+    <section>
+      <h2>Design Direction</h2>
+      <p>依使用者提供的參考圖，前端改為大面積 full-bleed hero：左側是產品敘事與 CTA，右側是重新生成的亮色 SaaS dashboard 圖。表單與狀態卡保留完整互動，作為 hero 下方的操作台。</p>
+    </section>
+
+    <section>
+      <h2>Changed Files</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>frontend/public/ai-seo-hero.png</code></td>
+            <td>重新生成並替換為亮色產品 dashboard 主視覺。</td>
+          </tr>
+          <tr>
+            <td><code>frontend/src/App.tsx</code></td>
+            <td>重製滿版 hero、導覽、CTA、pipeline 區塊。</td>
+          </tr>
+          <tr>
+            <td><code>frontend/src/components/ArticleForm.tsx</code></td>
+            <td>清理中文文案並配合新版視覺調整表單。</td>
+          </tr>
+          <tr>
+            <td><code>frontend/src/components/ResultCard.tsx</code></td>
+            <td>清理狀態文案並更新狀態卡視覺。</td>
+          </tr>
+          <tr>
+            <td><code>frontend/src/components/KeywordInput.tsx</code></td>
+            <td>清理關鍵字輸入文案與焦點樣式。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Verification</h2>
+      <p>已執行 <code>npm run build</code> 成功。已用瀏覽器檢查桌面與 390px 手機寬度，確認滿版圖片、表單、CTA 和文字沒有明顯重疊或水平溢出。</p>
+    </section>
+  </main>
+</body>
+</html>

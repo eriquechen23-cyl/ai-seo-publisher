@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WordPress Theme Styling Milestone</title>
+  <style>
+    body { margin: 0; font-family: Arial, "Microsoft JhengHei", sans-serif; color: #172033; background: #f6f8fb; }
+    main { max-width: 1040px; margin: 0 auto; padding: 32px 20px 48px; }
+    header, section { background: #fff; border: 1px solid #d9e2ee; border-radius: 8px; padding: 24px; margin-bottom: 18px; }
+    h1, h2 { margin: 0 0 12px; }
+    p, li { line-height: 1.7; }
+    .meta { color: #536275; font-size: 14px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .item { border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; background: #fbfdff; }
+    code { background: #eef3f8; border-radius: 4px; padding: 2px 5px; }
+    svg { width: 100%; height: auto; border: 1px solid #e2e8f0; border-radius: 8px; background: #fbfdff; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>WordPress Theme Styling Milestone</h1>
+      <p class="meta">2026-07-03 21:37 Asia/Taipei · ai-seo-publisher · Codex</p>
+      <p>本階段新增本地 WordPress preview theme，改善前台首頁與文章頁的展示品質。實作只觸及 <code>wp-content/themes</code> theme layer，不修改 WordPress core。</p>
+    </header>
+
+    <section>
+      <h2>架構流程</h2>
+      <svg viewBox="0 0 980 300" role="img" aria-label="WordPress theme install flow">
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#0f766e"></path>
+          </marker>
+        </defs>
+        <rect x="42" y="80" width="210" height="72" rx="8" fill="#ecfeff" stroke="#0891b2"></rect>
+        <text x="147" y="108" text-anchor="middle" font-size="14" font-weight="700">Repo Theme Files</text>
+        <text x="147" y="130" text-anchor="middle" font-size="12">wordpress/themes/ai-seo-demo</text>
+
+        <rect x="332" y="80" width="190" height="72" rx="8" fill="#f0fdf4" stroke="#16a34a"></rect>
+        <text x="427" y="108" text-anchor="middle" font-size="14" font-weight="700">Startup Script</text>
+        <text x="427" y="130" text-anchor="middle" font-size="12">docker cp + wp theme activate</text>
+
+        <rect x="602" y="80" width="170" height="72" rx="8" fill="#fff7ed" stroke="#ea580c"></rect>
+        <text x="687" y="108" text-anchor="middle" font-size="14" font-weight="700">WordPress Theme</text>
+        <text x="687" y="130" text-anchor="middle" font-size="12">wp-content/themes</text>
+
+        <rect x="822" y="80" width="120" height="72" rx="8" fill="#eef2ff" stroke="#4f46e5"></rect>
+        <text x="882" y="108" text-anchor="middle" font-size="14" font-weight="700">Front-end</text>
+        <text x="882" y="130" text-anchor="middle" font-size="12">Styled preview</text>
+
+        <path d="M252 116 L332 116" stroke="#0f766e" stroke-width="2.5" marker-end="url(#arrow)"></path>
+        <path d="M522 116 L602 116" stroke="#0f766e" stroke-width="2.5" marker-end="url(#arrow)"></path>
+        <path d="M772 116 L822 116" stroke="#0f766e" stroke-width="2.5" marker-end="url(#arrow)"></path>
+        <text x="490" y="208" text-anchor="middle" font-size="13" fill="#475569">WordPress core remains untouched</text>
+      </svg>
+    </section>
+
+    <section>
+      <h2>實作摘要</h2>
+      <div class="grid">
+        <div class="item"><strong>Theme</strong><p>新增 <code>AI SEO Demo</code> theme，包含首頁、文章頁、header/footer 與 CSS。</p></div>
+        <div class="item"><strong>Script</strong><p><code>start-wordpress.ps1</code> 會複製 theme 並用 WP-CLI 啟用。</p></div>
+        <div class="item"><strong>Presentation</strong><p>文章頁現在有品牌 header、內容容器、側欄說明、列表與 CTA 樣式。</p></div>
+        <div class="item"><strong>Boundary</strong><p>只調整 theme layer；不修改 core、不改 REST API、不污染文章 HTML。</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>驗證狀態</h2>
+      <ul>
+        <li>WP-CLI 回報 <code>AI SEO Demo</code> theme 已 Active。</li>
+        <li><code>php -l</code> 檢查 <code>functions.php</code>、<code>index.php</code>、<code>single.php</code>、<code>header.php</code>、<code>footer.php</code> 無語法錯誤。</li>
+        <li><code>http://localhost:8080</code> 回 200，HTML 載入 <code>ai-seo-demo-style-css</code>。</li>
+        <li><code>style.css</code> URL 回 200。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>下一步</h2>
+      <p>建議產生一篇新的 SEO 草稿後，從前端結果卡開啟 WordPress 編輯或預覽頁，確認生成內容在新 theme 下的排版。若需要更像正式品牌站，可下一步加入站台 logo、文章分類標籤與自訂封面圖。</p>
+    </section>
+  </main>
+</body>
+</html>

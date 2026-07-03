@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frontend One Page Redesign</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2937;
+      --muted: #64748b;
+      --line: #d8dee8;
+      --panel: #f8fafc;
+      --accent: #0f766e;
+      --warn: #b45309;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, "Noto Sans TC", sans-serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.55;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+    }
+
+    header {
+      border-bottom: 2px solid var(--line);
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.2;
+    }
+
+    h2 {
+      border-bottom: 1px solid var(--line);
+      font-size: 20px;
+      margin-top: 32px;
+      padding-bottom: 8px;
+    }
+
+    .meta {
+      color: var(--muted);
+      display: grid;
+      gap: 4px;
+      font-size: 14px;
+    }
+
+    .status {
+      background: var(--panel);
+      border-left: 4px solid var(--accent);
+      margin: 20px 0;
+      padding: 14px 16px;
+    }
+
+    .risk {
+      border-left-color: var(--warn);
+    }
+
+    .flow-diagram {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      margin: 16px 0;
+      overflow-x: auto;
+      padding: 16px;
+    }
+
+    .flow-diagram svg {
+      display: block;
+      min-width: 820px;
+      width: 100%;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--panel);
+    }
+
+    code {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Frontend One Page Redesign</h1>
+      <div class="meta">
+        <div><strong>Milestone:</strong> Modern one-page frontend completed</div>
+        <div><strong>Project:</strong> AI SEO Publisher</div>
+        <div><strong>Generated:</strong> 2026-07-04 03:00 Asia/Taipei</div>
+        <div><strong>Author:</strong> Codex</div>
+      </div>
+    </header>
+
+    <section class="status">
+      <strong>Status:</strong> 完成一頁式現代前端改版，加入本地生成主視覺圖、清楚中文文案、響應式表單與狀態卡。
+    </section>
+
+    <section>
+      <h2>Current Situation Description</h2>
+      <p>原本前端是基礎表單版面，且部分中文文案已出現 mojibake。此次改成深色 hero 搭配產品視覺，第一屏露出生成工具，下面延伸 pipeline 說明。</p>
+    </section>
+
+    <section>
+      <h2>Context</h2>
+      <p>使用者希望前端改成現代一頁式風格，並搭配生成圖片。實作保留既有 API 與 job polling 行為，只重做 UI、文案、表單、結果卡和視覺資產。</p>
+    </section>
+
+    <section>
+      <h2>Architecture And Decisions</h2>
+      <ul>
+        <li>新增 <code>frontend/public/ai-seo-hero.png</code> 作為本地 hero 主視覺，避免依賴外部圖片連結。</li>
+        <li>重寫 <code>App.tsx</code> 為一頁式工具頁：hero、生成工具、pipeline 區塊。</li>
+        <li>重寫表單、關鍵字輸入與結果卡，修復亂碼並統一成現代 SaaS 工具視覺。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Architecture Flow Diagram</h2>
+      <figure class="flow-diagram" aria-label="Frontend one page flow diagram">
+        <svg viewBox="0 0 900 260" role="img" aria-labelledby="flow-title flow-desc" xmlns="http://www.w3.org/2000/svg">
+          <title id="flow-title">One page frontend flow</title>
+          <desc id="flow-desc">The page moves from hero visual to article form, live job status, and pipeline explanation.</desc>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f766e"></path>
+            </marker>
+          </defs>
+          <rect x="24" y="72" width="150" height="72" rx="6" fill="#f8fafc" stroke="#d8dee8"></rect>
+          <text x="99" y="102" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">Hero</text>
+          <text x="99" y="124" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">generated visual</text>
+
+          <line x1="190" y1="108" x2="270" y2="108" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"></line>
+
+          <rect x="286" y="72" width="150" height="72" rx="6" fill="#f8fafc" stroke="#d8dee8"></rect>
+          <text x="361" y="102" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">Generator</text>
+          <text x="361" y="124" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">article form</text>
+
+          <line x1="452" y1="108" x2="532" y2="108" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"></line>
+
+          <rect x="548" y="72" width="150" height="72" rx="6" fill="#f8fafc" stroke="#d8dee8"></rect>
+          <text x="623" y="102" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">Live Status</text>
+          <text x="623" y="124" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">job polling</text>
+
+          <line x1="714" y1="108" x2="794" y2="108" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"></line>
+
+          <rect x="810" y="72" width="66" height="72" rx="6" fill="#f8fafc" stroke="#d8dee8"></rect>
+          <text x="843" y="102" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">Flow</text>
+          <text x="843" y="124" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">steps</text>
+        </svg>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Changed Files</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Purpose</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>frontend/src/App.tsx</code></td>
+            <td>一頁式外層版面、hero、pipeline 區塊。</td>
+            <td>Done</td>
+          </tr>
+          <tr>
+            <td><code>frontend/src/components/ArticleForm.tsx</code></td>
+            <td>現代表單、範例填入、任務送出狀態。</td>
+            <td>Done</td>
+          </tr>
+          <tr>
+            <td><code>frontend/src/components/ResultCard.tsx</code></td>
+            <td>job polling 狀態卡與 WordPress draft CTA。</td>
+            <td>Done</td>
+          </tr>
+          <tr>
+            <td><code>frontend/public/ai-seo-hero.png</code></td>
+            <td>本地主視覺圖。</td>
+            <td>Done</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Verification</h2>
+      <p>已執行 <code>npm run build</code>，TypeScript 與 Vite build 成功。已啟動 Vite dev server 並用瀏覽器檢查桌面與 390px 手機寬度，確認主視覺、表單與文字沒有破圖或明顯重疊。</p>
+    </section>
+
+    <section>
+      <h2>Next Step Recommendations</h2>
+      <p>若要再提升質感，可下一步加入生成完成後的文章 HTML preview modal，讓使用者在進 WordPress 前先快速審稿。</p>
+    </section>
+
+    <section class="status risk">
+      <strong>Risks And Follow-ups:</strong> 目前前端仍依賴後端 API 和 WordPress 狀態；本次驗證聚焦 UI build 與視覺響應式，未執行完整發文端到端流程。
+    </section>
+  </main>
+</body>
+</html>

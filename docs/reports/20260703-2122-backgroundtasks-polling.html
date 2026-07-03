@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BackgroundTasks + Job Polling Milestone</title>
+  <style>
+    body { margin: 0; font-family: Arial, "Microsoft JhengHei", sans-serif; color: #172033; background: #f6f8fb; }
+    main { max-width: 1040px; margin: 0 auto; padding: 32px 20px 48px; }
+    header, section { background: #fff; border: 1px solid #d9e2ee; border-radius: 8px; padding: 24px; margin-bottom: 18px; }
+    h1, h2 { margin: 0 0 12px; }
+    p { line-height: 1.7; }
+    .meta { color: #536275; font-size: 14px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .item { border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; background: #fbfdff; }
+    code { background: #eef3f8; border-radius: 4px; padding: 2px 5px; }
+    svg { width: 100%; height: auto; border: 1px solid #e2e8f0; border-radius: 8px; background: #fbfdff; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>BackgroundTasks + Job Polling Milestone</h1>
+      <p class="meta">2026-07-03 21:22 Asia/Taipei · ai-seo-publisher · Codex</p>
+      <p>本階段將原本同步等待 LLM 與 WordPress 的流程，改為 FastAPI BackgroundTasks 背景處理搭配前端 job polling。目標是回應 Task 4 的架構韌性需求，避免外部 API latency 讓前端卡在單一 request。</p>
+    </header>
+
+    <section>
+      <h2>目前狀況</h2>
+      <p><code>POST /api/v1/articles/generate-publish</code> 現在會先建立 SQLite job，立即以 HTTP 202 回傳 <code>job_id</code>、<code>RECEIVED</code> 與 <code>status_url</code>。LLM 生成、內容驗證、修復與 WordPress draft 建立改由背景任務執行。</p>
+    </section>
+
+    <section>
+      <h2>架構流程</h2>
+      <svg viewBox="0 0 980 360" role="img" aria-label="Background job polling architecture">
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#2563eb"></path>
+          </marker>
+        </defs>
+        <rect x="30" y="42" width="150" height="62" rx="8" fill="#e0f2fe" stroke="#0284c7"></rect>
+        <text x="105" y="67" text-anchor="middle" font-size="14" font-weight="700">React Form</text>
+        <text x="105" y="88" text-anchor="middle" font-size="12">submit JSON</text>
+
+        <rect x="250" y="42" width="160" height="62" rx="8" fill="#eef2ff" stroke="#4f46e5"></rect>
+        <text x="330" y="67" text-anchor="middle" font-size="14" font-weight="700">FastAPI Router</text>
+        <text x="330" y="88" text-anchor="middle" font-size="12">202 job_id</text>
+
+        <rect x="490" y="42" width="155" height="62" rx="8" fill="#f0fdf4" stroke="#16a34a"></rect>
+        <text x="568" y="67" text-anchor="middle" font-size="14" font-weight="700">SQLite Jobs</text>
+        <text x="568" y="88" text-anchor="middle" font-size="12">status source</text>
+
+        <rect x="250" y="178" width="190" height="62" rx="8" fill="#fff7ed" stroke="#ea580c"></rect>
+        <text x="345" y="203" text-anchor="middle" font-size="14" font-weight="700">BackgroundTasks</text>
+        <text x="345" y="224" text-anchor="middle" font-size="12">run workflow</text>
+
+        <rect x="520" y="178" width="170" height="62" rx="8" fill="#fefce8" stroke="#ca8a04"></rect>
+        <text x="605" y="203" text-anchor="middle" font-size="14" font-weight="700">LLM + Validator</text>
+        <text x="605" y="224" text-anchor="middle" font-size="12">retry and repair</text>
+
+        <rect x="770" y="178" width="165" height="62" rx="8" fill="#fdf2f8" stroke="#db2777"></rect>
+        <text x="853" y="203" text-anchor="middle" font-size="14" font-weight="700">WordPress REST</text>
+        <text x="853" y="224" text-anchor="middle" font-size="12">draft post</text>
+
+        <path d="M180 73 L250 73" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"></path>
+        <path d="M410 73 L490 73" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"></path>
+        <path d="M330 104 L342 178" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"></path>
+        <path d="M440 209 L520 209" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"></path>
+        <path d="M690 209 L770 209" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"></path>
+        <path d="M853 240 C853 310 568 310 568 104" fill="none" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"></path>
+        <path d="M568 104 C568 140 105 140 105 104" fill="none" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"></path>
+        <text x="310" y="132" font-size="12" fill="#334155">GET /jobs/{job_id} polling</text>
+      </svg>
+    </section>
+
+    <section>
+      <h2>實作摘要</h2>
+      <div class="grid">
+        <div class="item"><strong>Backend API</strong><p>新增 enqueue response 與 <code>GET /articles/jobs/{job_id}</code> 狀態查詢。</p></div>
+        <div class="item"><strong>Workflow</strong><p>拆成 <code>enqueue()</code> 與 <code>process_job()</code>，背景任務將錯誤落庫。</p></div>
+        <div class="item"><strong>Frontend</strong><p>React Query mutation 建立任務，query 每 1.5 秒輪詢直到完成或失敗。</p></div>
+        <div class="item"><strong>韌性</strong><p>保留 LLM timeout retry，WordPress 連線錯誤會標記為 retryable job error。</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>驗證狀態</h2>
+      <p>已執行 <code>backend\.venv\Scripts\python.exe -m pytest backend\tests</code>，7 個測試通過。已執行 <code>npm run build</code>，TypeScript 與 Vite production build 通過。</p>
+    </section>
+
+    <section>
+      <h2>下一步</h2>
+      <p>建議用實際 WordPress 與 LLM key 跑一次端到端 Demo，展示前端從 RECEIVED 到 COMPLETED 的狀態變化。若要更接近正式環境，下一階段可把 BackgroundTasks 換成 Redis queue + worker，但保留現在的 polling API 契約。</p>
+    </section>
+  </main>
+</body>
+</html>

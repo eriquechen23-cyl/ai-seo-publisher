@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Critic Pipeline Milestone</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2937;
+      --muted: #64748b;
+      --line: #d8dee8;
+      --panel: #f8fafc;
+      --accent: #0f766e;
+      --warn: #b45309;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, "Noto Sans TC", sans-serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.55;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+    }
+
+    header {
+      border-bottom: 2px solid var(--line);
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.2;
+    }
+
+    h2 {
+      border-bottom: 1px solid var(--line);
+      font-size: 20px;
+      margin-top: 32px;
+      padding-bottom: 8px;
+    }
+
+    .meta {
+      color: var(--muted);
+      display: grid;
+      gap: 4px;
+      font-size: 14px;
+    }
+
+    .status {
+      background: var(--panel);
+      border-left: 4px solid var(--accent);
+      margin: 20px 0;
+      padding: 14px 16px;
+    }
+
+    .risk {
+      border-left-color: var(--warn);
+    }
+
+    .flow-diagram {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      margin: 16px 0;
+      overflow-x: auto;
+      padding: 16px;
+    }
+
+    .flow-diagram svg {
+      display: block;
+      min-width: 820px;
+      width: 100%;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--panel);
+    }
+
+    code {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Agent Critic Pipeline Milestone</h1>
+      <div class="meta">
+        <div><strong>Milestone:</strong> Producer / Critique pipeline implemented</div>
+        <div><strong>Project:</strong> AI SEO Publisher</div>
+        <div><strong>Generated:</strong> 2026-07-04 02:34 Asia/Taipei</div>
+        <div><strong>Author:</strong> Codex</div>
+      </div>
+    </header>
+
+    <section class="status">
+      <strong>Status:</strong> 完成文章生成流程的 agent pipeline 導入，並以測試確認 critic pattern 會正確觸發反思修稿。
+    </section>
+
+    <section>
+      <h2>Current Situation Description</h2>
+      <p>原本流程已經有 generate、validate、repair、publish，但 repair 是 workflow 內部的單一路徑。現在已抽出 ArticleAgentPipeline，讓 Producer 與 Critique 的職責更清楚，也保留 deterministic validator 作為安全與結構檢查。</p>
+    </section>
+
+    <section>
+      <h2>Context</h2>
+      <p>需求是希望在文章生成過程中導入 Agent system 或 AgentSkill pipeline，並結合 critic pattern，讓 producer 和 critique 進行反思。此次採取輕量內部 pipeline，避免引入過重 runtime，保留未來替換成 AgentSkill 或 LangGraph 類 orchestration 的接點。</p>
+    </section>
+
+    <section>
+      <h2>Architecture And Decisions</h2>
+      <ul>
+        <li>新增 <code>ArticleAgentPipeline</code> 作為 agent orchestration 邊界，workflow 只負責 job 狀態與發布。</li>
+        <li>新增 <code>ArticleCritiqueResult</code>，讓 critique output 有明確 schema，而不是混在 validation error 裡。</li>
+        <li>保留既有 <code>REPAIRING</code> 與 <code>reflection_count</code>，避免 API 與資料表大幅變更。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Architecture Flow Diagram</h2>
+      <figure class="flow-diagram" aria-label="Article agent pipeline flow diagram">
+        <svg viewBox="0 0 980 330" role="img" aria-labelledby="flow-title flow-desc" xmlns="http://www.w3.org/2000/svg">
+          <title id="flow-title">Article agent pipeline</title>
+          <desc id="flow-desc">Producer generates, validator and critique review, producer revises when needed, then workflow publishes to WordPress.</desc>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f766e"></path>
+            </marker>
+          </defs>
+
+          <rect x="24" y="72" width="142" height="72" rx="6" fill="#f8fafc" stroke="#d8dee8"></rect>
+          <text x="95" y="102" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">Workflow</text>
+          <text x="95" y="124" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">job status</text>
+
+          <line x1="182" y1="108" x2="250" y2="108" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"></line>
+
+          <rect x="266" y="72" width="142" height="72" rx="6" fill="#f8fafc" stroke="#d8dee8"></rect>
+          <text x="337" y="102" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">Producer</text>
+          <text x="337" y="124" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">draft article</text>
+
+          <line x1="424" y1="108" x2="492" y2="108" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"></line>
+
+          <rect x="508" y="42" width="142" height="62" rx="6" fill="#f8fafc" stroke="#d8dee8"></rect>
+          <text x="579" y="69" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">Validator</text>
+          <text x="579" y="89" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">rules</text>
+
+          <rect x="508" y="126" width="142" height="62" rx="6" fill="#f8fafc" stroke="#d8dee8"></rect>
+          <text x="579" y="153" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">Critique</text>
+          <text x="579" y="173" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">review</text>
+
+          <line x1="666" y1="108" x2="734" y2="108" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"></line>
+
+          <rect x="750" y="72" width="142" height="72" rx="6" fill="#f8fafc" stroke="#d8dee8"></rect>
+          <text x="821" y="102" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">Publish Gate</text>
+          <text x="821" y="124" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">sanitize + final</text>
+
+          <line x1="821" y1="158" x2="821" y2="224" stroke="#b45309" stroke-width="2" marker-end="url(#arrow)"></line>
+          <path d="M 750 244 C 560 290, 380 290, 337 160" fill="none" stroke="#b45309" stroke-width="2" marker-end="url(#arrow)"></path>
+          <text x="584" y="286" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#b45309">if validation or critique fails: REPAIRING + reflection_count</text>
+
+          <line x1="908" y1="108" x2="952" y2="108" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"></line>
+          <text x="954" y="112" font-family="Arial, sans-serif" font-size="13" fill="#64748b">WordPress draft</text>
+        </svg>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Implementation Notes</h2>
+      <p>新增 pipeline 後，LLM service 提供 generate、critique、revise 三個方法；prompt builder 則分別維護 producer prompt、critic prompt 和 revision prompt。舊的 repair_article 仍保留為相容入口。</p>
+    </section>
+
+    <section>
+      <h2>Changed Or Planned Files</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Purpose</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>backend/app/services/article_agent_pipeline.py</code></td>
+            <td>新增 Producer / Critique orchestration。</td>
+            <td>Done</td>
+          </tr>
+          <tr>
+            <td><code>backend/app/services/llm_service.py</code></td>
+            <td>新增 critique 與 revision LLM methods。</td>
+            <td>Done</td>
+          </tr>
+          <tr>
+            <td><code>backend/app/services/prompt_builder.py</code></td>
+            <td>重整 producer、critic、revision prompts。</td>
+            <td>Done</td>
+          </tr>
+          <tr>
+            <td><code>backend/tests/test_article_agent_pipeline.py</code></td>
+            <td>新增 pipeline behavior tests。</td>
+            <td>Done</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Verification</h2>
+      <p>已執行 <code>$env:PYTHONPATH="$PWD\backend"; backend\.venv\Scripts\python.exe -m pytest backend\tests</code>，結果為 9 passed。</p>
+    </section>
+
+    <section>
+      <h2>Next Step Recommendations</h2>
+      <p>下一步可考慮把 critique summary 與 reflection_count 一起暴露到 job status 或後台審稿畫面，讓使用者看到 AI 反思修稿的原因與結果。</p>
+    </section>
+
+    <section class="status risk">
+      <strong>Risks And Follow-ups:</strong> 目前 max_reflections 預設為 1，適合 demo。若未來文章品質要求更高，應加入 token/cost 控制、持久化 critique trace，以及多輪反思上限設定。
+    </section>
+  </main>
+</body>
+</html>

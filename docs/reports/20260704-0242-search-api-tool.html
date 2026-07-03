@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Search API Tool Milestone</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2937;
+      --muted: #64748b;
+      --line: #d8dee8;
+      --panel: #f8fafc;
+      --accent: #0f766e;
+      --warn: #b45309;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, "Noto Sans TC", sans-serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.55;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+    }
+
+    header {
+      border-bottom: 2px solid var(--line);
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.2;
+    }
+
+    h2 {
+      border-bottom: 1px solid var(--line);
+      font-size: 20px;
+      margin-top: 32px;
+      padding-bottom: 8px;
+    }
+
+    .meta {
+      color: var(--muted);
+      display: grid;
+      gap: 4px;
+      font-size: 14px;
+    }
+
+    .status {
+      background: var(--panel);
+      border-left: 4px solid var(--accent);
+      margin: 20px 0;
+      padding: 14px 16px;
+    }
+
+    .risk {
+      border-left-color: var(--warn);
+    }
+
+    .flow-diagram {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      margin: 16px 0;
+      overflow-x: auto;
+      padding: 16px;
+    }
+
+    .flow-diagram svg {
+      display: block;
+      min-width: 860px;
+      width: 100%;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--panel);
+    }
+
+    code {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Search API Tool Milestone</h1>
+      <div class="meta">
+        <div><strong>Milestone:</strong> Controlled Search API Tool added to article agent pipeline</div>
+        <div><strong>Project:</strong> AI SEO Publisher</div>
+        <div><strong>Generated:</strong> 2026-07-04 02:42 Asia/Taipei</div>
+        <div><strong>Author:</strong> Codex</div>
+      </div>
+    </header>
+
+    <section class="status">
+      <strong>Status:</strong> 完成 Search API Tool 導入。文章生成現在會先建立 bounded research context，再交給 Producer / Critique 使用。
+    </section>
+
+    <section>
+      <h2>Current Situation Description</h2>
+      <p>原本 pipeline 已有 Producer / Critique 反思流程，但 LLM 沒有外部搜尋脈絡。現在新增 ArticleResearchTool，預設 mock，可用環境變數切換 disabled 或 Brave Search API。</p>
+    </section>
+
+    <section>
+      <h2>Context</h2>
+      <p>這次採用 Search API Tool，而不是 browser automation。後端負責查詢、timeout、結果數量、API key 與格式正規化；LLM 只接收 title、URL、snippet、query、provider 與錯誤狀態。</p>
+    </section>
+
+    <section>
+      <h2>Architecture And Decisions</h2>
+      <ul>
+        <li>新增 <code>ArticleResearchTool</code>，支援 <code>mock</code>、<code>disabled</code>、<code>brave</code> 模式。</li>
+        <li>新增 <code>ArticleResearchContext</code>，讓搜尋結果以 schema 形式傳入 prompts。</li>
+        <li>搜尋失敗不阻斷文章生成，而是把 error context 傳給 LLM，並要求不要編造來源型事實。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Architecture Flow Diagram</h2>
+      <figure class="flow-diagram" aria-label="Search API tool flow diagram">
+        <svg viewBox="0 0 1020 300" role="img" aria-labelledby="flow-title flow-desc" xmlns="http://www.w3.org/2000/svg">
+          <title id="flow-title">Researcher Producer Critique Pipeline</title>
+          <desc id="flow-desc">The workflow calls a controlled search tool before producer and critique steps.</desc>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f766e"></path>
+            </marker>
+          </defs>
+
+          <rect x="24" y="84" width="132" height="70" rx="6" fill="#f8fafc" stroke="#d8dee8"></rect>
+          <text x="90" y="113" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">Workflow</text>
+          <text x="90" y="134" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">job request</text>
+
+          <line x1="172" y1="119" x2="230" y2="119" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"></line>
+
+          <rect x="246" y="84" width="142" height="70" rx="6" fill="#f8fafc" stroke="#d8dee8"></rect>
+          <text x="317" y="113" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">Search Tool</text>
+          <text x="317" y="134" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">mock / brave</text>
+
+          <line x1="404" y1="119" x2="462" y2="119" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"></line>
+
+          <rect x="478" y="84" width="142" height="70" rx="6" fill="#f8fafc" stroke="#d8dee8"></rect>
+          <text x="549" y="113" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">Research Context</text>
+          <text x="549" y="134" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">bounded schema</text>
+
+          <line x1="636" y1="119" x2="694" y2="119" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"></line>
+
+          <rect x="710" y="42" width="142" height="62" rx="6" fill="#f8fafc" stroke="#d8dee8"></rect>
+          <text x="781" y="69" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">Producer</text>
+          <text x="781" y="89" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">uses context</text>
+
+          <rect x="710" y="136" width="142" height="62" rx="6" fill="#f8fafc" stroke="#d8dee8"></rect>
+          <text x="781" y="163" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">Critique</text>
+          <text x="781" y="183" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">checks claims</text>
+
+          <line x1="868" y1="119" x2="926" y2="119" stroke="#0f766e" stroke-width="2" marker-end="url(#arrow)"></line>
+
+          <rect x="942" y="84" width="66" height="70" rx="6" fill="#f8fafc" stroke="#d8dee8"></rect>
+          <text x="975" y="113" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#1f2937">Draft</text>
+          <text x="975" y="134" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">WP</text>
+
+          <path d="M 852 198 C 780 254, 692 254, 710 112" fill="none" stroke="#b45309" stroke-width="2" marker-end="url(#arrow)"></path>
+          <text x="720" y="260" font-family="Arial, sans-serif" font-size="13" fill="#b45309">if critique fails: revise with same research context</text>
+        </svg>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Implementation Notes</h2>
+      <p>PromptBuilder 現在會在 article brief 中加入 research context；LLMService 的 generate、critique、revise methods 都接受同一份 context。ArticleAgentPipeline 在生成前先呼叫 research tool。</p>
+    </section>
+
+    <section>
+      <h2>Changed Or Planned Files</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Purpose</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>backend/app/services/article_research_tool.py</code></td>
+            <td>Search API Tool implementation。</td>
+            <td>Done</td>
+          </tr>
+          <tr>
+            <td><code>backend/app/schemas/research.py</code></td>
+            <td>Search result and research context schemas。</td>
+            <td>Done</td>
+          </tr>
+          <tr>
+            <td><code>backend/app/services/article_agent_pipeline.py</code></td>
+            <td>Research stage added before Producer。</td>
+            <td>Done</td>
+          </tr>
+          <tr>
+            <td><code>backend/tests/test_article_research_tool.py</code></td>
+            <td>Search tool unit tests。</td>
+            <td>Done</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Verification</h2>
+      <p>已執行 <code>$env:PYTHONPATH="$PWD\backend"; backend\.venv\Scripts\python.exe -m pytest backend\tests</code>，結果為 12 passed。</p>
+    </section>
+
+    <section>
+      <h2>Next Step Recommendations</h2>
+      <p>下一步可以把 research context 或來源摘要持久化到 job record，讓前端或 WordPress draft 顯示文章參考來源。</p>
+    </section>
+
+    <section class="status risk">
+      <strong>Risks And Follow-ups:</strong> Brave Search API 尚未做 live integration test，因為目前測試避免外部網路與金鑰依賴；接上真實 API key 後建議做一次手動端到端驗證。
+    </section>
+  </main>
+</body>
+</html>

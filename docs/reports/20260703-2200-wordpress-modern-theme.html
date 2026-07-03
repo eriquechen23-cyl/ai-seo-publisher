@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WordPress Modern Theme Refinement</title>
+  <style>
+    body { margin: 0; font-family: Arial, "Microsoft JhengHei", sans-serif; color: #111827; background: #f4f6f8; }
+    main { max-width: 1040px; margin: 0 auto; padding: 32px 20px 48px; }
+    header, section { background: #fff; border: 1px solid #dde5ee; border-radius: 8px; padding: 24px; margin-bottom: 18px; }
+    h1, h2 { margin: 0 0 12px; }
+    p, li { line-height: 1.7; }
+    .meta { color: #667085; font-size: 14px; }
+    code { background: #eef3f8; border-radius: 4px; padding: 2px 5px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .item { border: 1px solid #dde5ee; border-radius: 8px; padding: 14px; background: #f8fafc; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>WordPress Modern Theme Refinement</h1>
+      <p class="meta">2026-07-03 22:00 Asia/Taipei · ai-seo-publisher · Codex</p>
+      <p>根據使用者截圖回饋，第一版 theme 仍像傳統卡片頁且標題過大。本階段重做 single post 文章頁，使其更接近現代內容產品頁。</p>
+    </header>
+    <section>
+      <h2>設計修正</h2>
+      <div class="grid">
+        <div class="item"><strong>Hero</strong><p>改為全寬深色 hero，主標題控制在合理閱讀尺度。</p></div>
+        <div class="item"><strong>Content</strong><p>正文區變成 760px 閱讀欄，並隱藏 LLM 內容內重複的第一個 h1。</p></div>
+        <div class="item"><strong>Sidebar</strong><p>側欄改為輕量 metadata，不再使用突兀卡片。</p></div>
+        <div class="item"><strong>Responsive</strong><p>手機寬度 390px 無水平溢出，標題降為 34px。</p></div>
+      </div>
+    </section>
+    <section>
+      <h2>驗證</h2>
+      <ul>
+        <li>WP-CLI 確認 <code>AI SEO Demo</code> theme active，版本為 <code>1.1.0</code>。</li>
+        <li><code>php -l</code> 檢查 <code>single.php</code> 與 <code>functions.php</code> 無語法錯誤。</li>
+        <li><code>style.css</code> URL 回 200，且內容包含 <code>Version: 1.1.0</code>。</li>
+        <li>瀏覽器桌面檢查：內容內第一個 h1 已隱藏，正文寬度為 760px。</li>
+        <li>瀏覽器手機檢查：390px viewport 無水平溢出。</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

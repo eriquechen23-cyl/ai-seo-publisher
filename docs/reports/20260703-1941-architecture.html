@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI SEO Publisher 架構里程碑</title>
+    <style>
+      body { margin: 0; font-family: Arial, "Microsoft JhengHei", sans-serif; color: #18212f; background: #f6f7f9; }
+      main { max-width: 1080px; margin: 0 auto; padding: 32px 20px 56px; }
+      header { margin-bottom: 24px; }
+      h1 { margin: 0 0 8px; font-size: 30px; }
+      h2 { margin-top: 28px; font-size: 20px; }
+      p, li { line-height: 1.7; }
+      .meta { color: #5d6878; }
+      .panel { background: #fff; border: 1px solid #dfe4ea; border-radius: 8px; padding: 20px; margin: 16px 0; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+      .chip { background: #eef3f8; border: 1px solid #d8e2ec; border-radius: 999px; padding: 8px 12px; display: inline-block; margin: 4px; }
+      svg { width: 100%; height: auto; background: #fff; border: 1px solid #dfe4ea; border-radius: 8px; }
+      code { background: #eef1f5; padding: 2px 5px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>AI SEO Publisher 架構里程碑</h1>
+        <div class="meta">時間：2026-07-03 19:41 Asia/Taipei｜作者：Codex｜專案：ai-seo-publisher</div>
+      </header>
+
+      <section class="panel">
+        <h2>目前里程碑</h2>
+        <p>已根據實作題 PDF 確認範圍：React SPA、FastAPI、LLM 生成 HTML SEO 文章、WordPress REST API 建立 draft，並將 timeout 與 WordPress 連線失敗納入韌性處理。</p>
+      </section>
+
+      <section class="panel">
+        <h2>目前情況</h2>
+        <p>工作區原本只包含題目 PDF，沒有既有 Git repo 或應用程式碼。因此本次會從零建立單體 Demo 架構，保留清楚 Service 分層，避免過早導入背景佇列、Redis 或多服務部署。</p>
+      </section>
+
+      <section>
+        <h2>架構流程圖</h2>
+        <svg viewBox="0 0 980 430" role="img" aria-label="AI SEO Publisher architecture flow">
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#334155"></path>
+            </marker>
+          </defs>
+          <rect x="35" y="45" width="180" height="95" rx="8" fill="#e8f4ff" stroke="#5aa0d8"></rect>
+          <text x="125" y="82" text-anchor="middle" font-size="16" font-weight="700">React SPA</text>
+          <text x="125" y="110" text-anchor="middle" font-size="13">Form / Loading / Toast</text>
+
+          <rect x="300" y="45" width="190" height="95" rx="8" fill="#edf7ed" stroke="#62a36f"></rect>
+          <text x="395" y="82" text-anchor="middle" font-size="16" font-weight="700">FastAPI Router</text>
+          <text x="395" y="110" text-anchor="middle" font-size="13">POST /generate-publish</text>
+
+          <rect x="585" y="35" width="245" height="115" rx="8" fill="#fff7e6" stroke="#d29a33"></rect>
+          <text x="707" y="70" text-anchor="middle" font-size="16" font-weight="700">Article Workflow</text>
+          <text x="707" y="97" text-anchor="middle" font-size="13">Prompt / LLM / Critic</text>
+          <text x="707" y="122" text-anchor="middle" font-size="13">Repair / Sanitize / Publish</text>
+
+          <rect x="585" y="210" width="170" height="75" rx="8" fill="#f0efff" stroke="#8276d8"></rect>
+          <text x="670" y="242" text-anchor="middle" font-size="15" font-weight="700">SQLite</text>
+          <text x="670" y="265" text-anchor="middle" font-size="13">Job log / errors</text>
+
+          <rect x="90" y="245" width="170" height="75" rx="8" fill="#f8eef5" stroke="#c2699b"></rect>
+          <text x="175" y="277" text-anchor="middle" font-size="15" font-weight="700">LLM Provider</text>
+          <text x="175" y="300" text-anchor="middle" font-size="13">JSON title + HTML</text>
+
+          <rect x="350" y="310" width="205" height="75" rx="8" fill="#eef8f8" stroke="#5ca3a3"></rect>
+          <text x="452" y="342" text-anchor="middle" font-size="15" font-weight="700">Rule-based Critic</text>
+          <text x="452" y="365" text-anchor="middle" font-size="13">HTML + keywords</text>
+
+          <rect x="790" y="245" width="165" height="75" rx="8" fill="#fff0ef" stroke="#d16b61"></rect>
+          <text x="872" y="277" text-anchor="middle" font-size="15" font-weight="700">WordPress</text>
+          <text x="872" y="300" text-anchor="middle" font-size="13">REST API draft</text>
+
+          <line x1="215" y1="92" x2="300" y2="92" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="490" y1="92" x2="585" y2="92" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="625" y1="150" x2="220" y2="245" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="690" y1="150" x2="670" y2="210" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="700" y1="150" x2="475" y2="310" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"></line>
+          <line x1="830" y1="150" x2="870" y2="245" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"></line>
+        </svg>
+      </section>
+
+      <section class="panel">
+        <h2>已定決策</h2>
+        <div class="grid">
+          <div><span class="chip">單體 Demo</span><p>FastAPI 內部以 service 分層呈現架構，不切多服務。</p></div>
+          <div><span class="chip">SQLite job log</span><p>只記錄本系統任務，不碰 WordPress MySQL。</p></div>
+          <div><span class="chip">Structured output</span><p>LLM 回傳 JSON，後端再驗證與清理 HTML。</p></div>
+          <div><span class="chip">One repair</span><p>最多修復一次，展示 reflection 但避免過度設計。</p></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>下一步方向</h2>
+        <p>接著建立 FastAPI 後端、React 前端、環境範例、測試與 README。完成後會補充實作完成與驗證結果。</p>
+      </section>
+    </main>
+  </body>
+</html>
