@@ -20,9 +20,10 @@ class Settings(BaseSettings):
     llm_model: str = "gpt-4o-mini"
     llm_timeout_seconds: int = 30
 
-    research_mode: Literal["disabled", "mock", "brave"] = "mock"
+    research_mode: Literal["disabled", "mock", "brave", "duckduckgo"] = "mock"
     search_api_key: str = ""
     search_api_base: str = "https://api.search.brave.com/res/v1/web/search"
+    duckduckgo_search_url: str = "https://html.duckduckgo.com/html/"
     search_result_count: int = 5
     search_timeout_seconds: int = 10
 
