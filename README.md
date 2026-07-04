@@ -156,10 +156,8 @@ Article generation can use a controlled Search API Tool before the Producer / Cr
 Configure `backend/.env`:
 
 ```env
-RESEARCH_MODE=mock
+RESEARCH_MODE=duckduckgo
 RESEARCH_ROUTER_MODE=auto
-SEARCH_API_KEY=
-SEARCH_API_BASE=https://api.search.brave.com/res/v1/web/search
 DUCKDUCKGO_SEARCH_URL=https://html.duckduckgo.com/html/
 SEARCH_RESULT_COUNT=5
 SEARCH_TIMEOUT_SECONDS=10
@@ -167,8 +165,7 @@ SEARCH_TIMEOUT_SECONDS=10
 
 - `mock`：default demo mode, no network call.
 - `disabled`：skip research.
-- `brave`：call Brave Search API with `SEARCH_API_KEY`.
-- `duckduckgo`：crawl DuckDuckGo HTML search results without `SEARCH_API_KEY`.
+- `duckduckgo`：crawl DuckDuckGo HTML search results without an API key.
 
 Router modes:
 

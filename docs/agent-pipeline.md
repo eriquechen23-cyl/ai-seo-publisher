@@ -29,10 +29,8 @@ ArticleWorkflowService
 Configure the tool in `backend/.env`:
 
 ```env
-RESEARCH_MODE=mock
+RESEARCH_MODE=duckduckgo
 RESEARCH_ROUTER_MODE=auto
-SEARCH_API_KEY=
-SEARCH_API_BASE=https://api.search.brave.com/res/v1/web/search
 DUCKDUCKGO_SEARCH_URL=https://html.duckduckgo.com/html/
 SEARCH_RESULT_COUNT=5
 SEARCH_TIMEOUT_SECONDS=10
@@ -42,7 +40,6 @@ Modes:
 
 - `mock`: default demo mode. Returns local fake search results and does not call the network.
 - `disabled`: skips research and tells the LLM no external context is available.
-- `brave`: calls Brave Search API with `SEARCH_API_KEY`.
 - `duckduckgo`: fetches DuckDuckGo HTML search results without an API key and parses title, URL, and snippet.
 
 Router modes:
@@ -82,7 +79,7 @@ $env:PYTHONPATH="$PWD\backend"; backend\.venv\Scripts\python.exe -m pytest backe
 Current coverage:
 
 - Search tool mock mode returns bounded context.
-- Brave mode safely reports missing `SEARCH_API_KEY` without network access.
+- DuckDuckGo mode parses HTML search results without an API key.
 - Pipeline passes research context to Producer and Critique.
 - Critique can still trigger one reflection / revision cycle.
 - Existing API, validator, and WordPress client tests still pass.
