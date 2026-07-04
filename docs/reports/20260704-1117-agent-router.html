@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agent Router Rule-Based Skill Report</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", "Noto Sans TC", sans-serif;
+        background: #f7faf9;
+        color: #0f172a;
+      }
+      body {
+        margin: 0;
+        padding: 40px 20px;
+      }
+      main {
+        max-width: 1080px;
+        margin: 0 auto;
+        background: #ffffff;
+        border: 1px solid #dbe7e6;
+        border-radius: 8px;
+        box-shadow: 0 24px 60px rgb(15 23 42 / 0.08);
+        overflow: hidden;
+      }
+      header {
+        padding: 30px 34px;
+        background: linear-gradient(120deg, #f8fffd, #ffffff 52%, #fff8ef);
+        border-bottom: 1px solid #e2e8f0;
+      }
+      section {
+        padding: 26px 34px;
+        border-bottom: 1px solid #edf2f7;
+      }
+      section:last-child {
+        border-bottom: 0;
+      }
+      h1, h2 {
+        margin: 0;
+      }
+      h1 {
+        font-size: 30px;
+      }
+      h2 {
+        margin-bottom: 12px;
+        font-size: 20px;
+      }
+      p, li {
+        line-height: 1.75;
+      }
+      ul {
+        margin: 0;
+        padding-left: 1.2rem;
+      }
+      code {
+        padding: 2px 5px;
+        border-radius: 4px;
+        background: #f1f5f9;
+      }
+      .tag {
+        display: inline-block;
+        margin-bottom: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #e8fbfb;
+        color: #237f86;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+      .card {
+        padding: 16px;
+        border: 1px solid #dbe7e6;
+        border-left: 6px solid #1f8f94;
+        border-radius: 6px;
+        background: #ffffff;
+      }
+      .diagram {
+        width: 100%;
+        height: auto;
+        margin-top: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #fbfefd;
+      }
+      @media (max-width: 760px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="tag">Milestone: Rule-based Agent Router</span>
+        <h1>Agent Router Rule-Based Skill Report</h1>
+        <p>Codex · 2026-07-04 · AI SEO Publisher</p>
+      </header>
+
+      <section>
+        <h2>目前狀態</h2>
+        <p>
+          系統原本只要存在 <code>ArticleResearchTool</code> 就會進行 research。
+          本次新增 <code>ArticleAgentRouter</code>，讓 pipeline 先依規則判斷是否需要 tool，
+          再決定要呼叫 DuckDuckGo / Brave / mock research，或直接回傳 <code>router-skip</code> context。
+        </p>
+      </section>
+
+      <section>
+        <h2>Rule-Based Router</h2>
+        <div class="grid">
+          <div class="card">
+            <strong>auto</strong>
+            <p>依文章 brief 規則判斷是否需要外部搜尋。這是產品化預設方向。</p>
+          </div>
+          <div class="card">
+            <strong>always</strong>
+            <p>每次都呼叫 research tool，適合現場 Demo 或想展示 tool usage。</p>
+          </div>
+          <div class="card">
+            <strong>never</strong>
+            <p>永遠跳過 research tool，適合離線測試或避免外部呼叫。</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>流程圖</h2>
+        <svg class="diagram" viewBox="0 0 980 330" role="img" aria-labelledby="title desc">
+          <title id="title">Agent router flow</title>
+          <desc id="desc">Article request enters workflow, router decides whether to use research tool, then producer and critique continue.</desc>
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#5bc5c7" />
+            </marker>
+          </defs>
+          <rect x="34" y="118" width="150" height="70" rx="8" fill="#fff" stroke="#dbe7e6" />
+          <text x="109" y="148" text-anchor="middle" font-size="15" font-weight="700">Article Request</text>
+          <text x="109" y="169" text-anchor="middle" font-size="12" fill="#64748b">topic + keywords</text>
+
+          <rect x="244" y="118" width="160" height="70" rx="8" fill="#ecfeff" stroke="#bae6fd" />
+          <text x="324" y="148" text-anchor="middle" font-size="15" font-weight="700">Agent Router</text>
+          <text x="324" y="169" text-anchor="middle" font-size="12" fill="#64748b">auto / always / never</text>
+
+          <rect x="484" y="52" width="178" height="70" rx="8" fill="#fff" stroke="#dbe7e6" />
+          <text x="573" y="82" text-anchor="middle" font-size="15" font-weight="700">Research Tool</text>
+          <text x="573" y="103" text-anchor="middle" font-size="12" fill="#64748b">DuckDuckGo / Brave</text>
+
+          <rect x="484" y="184" width="178" height="70" rx="8" fill="#fff7ed" stroke="#fed7aa" />
+          <text x="573" y="214" text-anchor="middle" font-size="15" font-weight="700">router-skip</text>
+          <text x="573" y="235" text-anchor="middle" font-size="12" fill="#64748b">no external call</text>
+
+          <rect x="742" y="118" width="168" height="70" rx="8" fill="#2b343c" stroke="#2b343c" />
+          <text x="826" y="148" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Producer + Critique</text>
+          <text x="826" y="169" text-anchor="middle" font-size="12" fill="#cbd5e1">LLM max 4 calls</text>
+
+          <line x1="184" y1="153" x2="235" y2="153" stroke="#5bc5c7" stroke-width="3" marker-end="url(#arrow)" />
+          <line x1="404" y1="139" x2="474" y2="91" stroke="#5bc5c7" stroke-width="3" marker-end="url(#arrow)" />
+          <line x1="404" y1="168" x2="474" y2="213" stroke="#e7a84b" stroke-width="3" marker-end="url(#arrow)" />
+          <line x1="662" y1="87" x2="732" y2="139" stroke="#5bc5c7" stroke-width="3" marker-end="url(#arrow)" />
+          <line x1="662" y1="219" x2="732" y2="168" stroke="#e7a84b" stroke-width="3" marker-end="url(#arrow)" />
+
+          <text x="456" y="38" font-size="12" fill="#237f86">use tool</text>
+          <text x="444" y="282" font-size="12" fill="#b45309">skip tool</text>
+        </svg>
+      </section>
+
+      <section>
+        <h2>新增檔案與介面</h2>
+        <ul>
+          <li><code>backend/app/services/article_agent_router.py</code>：rule-based routing skill。</li>
+          <li><code>docs/agent-router-skill.md</code>：router skill 文件，描述 input、output、規則與安全邊界。</li>
+          <li><code>RESEARCH_ROUTER_MODE</code>：支援 <code>auto</code>、<code>always</code>、<code>never</code>。</li>
+          <li><code>ArticleAgentPipeline</code>：在 research 前先呼叫 router。</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>驗證</h2>
+        <ul>
+          <li>後端測試：<code>18 passed</code>。</li>
+          <li>前端 build：<code>npm run build</code> 成功。</li>
+          <li>新增測試涵蓋 always、never、auto、internal brief skip，以及 pipeline skip research 的路徑。</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>下一步</h2>
+        <p>
+          短期可把 router decision 顯示在 job metadata，讓前端或審稿頁看到「為什麼有或沒有調用 tool」。
+          中期可把 rule set 改成設定檔；長期再升級成 LLM router 或多工具 router。
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

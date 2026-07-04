@@ -7,6 +7,7 @@ from app.core.exceptions import AppError, ErrorCode
 from app.schemas.article import GenerateArticleRequest
 from app.schemas.llm import ArticleCritiqueResult, ArticleValidationResult, LLMArticleOutput
 from app.schemas.research import ArticleResearchContext
+from app.services.article_agent_router import ArticleAgentRouter
 from app.services.article_research_tool import ArticleResearchTool
 from app.services.article_validator import ArticleValidator
 from app.services.llm_service import LLMService
@@ -31,11 +32,13 @@ class ArticleAgentPipeline:
         llm_service: LLMService,
         validator: ArticleValidator,
         research_tool: ArticleResearchTool | None = None,
+        agent_router: ArticleAgentRouter | None = None,
         max_reflections: int = 1,
     ) -> None:
         self.llm_service = llm_service
         self.validator = validator
         self.research_tool = research_tool
+        self.agent_router = agent_router or ArticleAgentRouter(mode="always")
         self.max_reflections = max_reflections
 
     async def run(
@@ -97,6 +100,14 @@ class ArticleAgentPipeline:
     async def _research(self, request: GenerateArticleRequest) -> ArticleResearchContext:
         if self.research_tool is None:
             return ArticleResearchContext(query="", provider="none")
+
+        decision = self.agent_router.route(request)
+        if not decision.use_research_tool:
+            return ArticleResearchContext(
+                query=self.research_tool.build_query(request),
+                provider="router-skip",
+                error=f"{decision.reason} Matched rules: {', '.join(decision.matched_rules)}",
+            )
 
         return await self.research_tool.research(request)
 

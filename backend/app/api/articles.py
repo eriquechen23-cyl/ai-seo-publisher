@@ -8,6 +8,7 @@ from app.schemas.article import (
     GenerateArticleRequest,
 )
 from app.services.article_validator import ArticleValidator
+from app.services.article_agent_router import ArticleAgentRouter
 from app.services.article_agent_pipeline import ArticleAgentPipeline
 from app.services.article_research_tool import ArticleResearchTool
 from app.services.article_workflow import ArticleWorkflowService
@@ -25,11 +26,13 @@ def build_workflow_service() -> ArticleWorkflowService:
     prompt_builder = PromptBuilder()
     llm_service = LLMService(settings, prompt_builder)
     validator = ArticleValidator()
+    agent_router = ArticleAgentRouter(settings.research_router_mode)
     research_tool = ArticleResearchTool(settings)
     agent_pipeline = ArticleAgentPipeline(
         llm_service=llm_service,
         validator=validator,
         research_tool=research_tool,
+        agent_router=agent_router,
     )
     wordpress_client = WordPressClient(
         base_url=settings.wordpress_url,

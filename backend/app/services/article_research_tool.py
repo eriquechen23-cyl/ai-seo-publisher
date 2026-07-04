@@ -13,7 +13,7 @@ class ArticleResearchTool:
         self.settings = settings
 
     async def research(self, request: GenerateArticleRequest) -> ArticleResearchContext:
-        query = self._build_query(request)
+        query = self.build_query(request)
 
         if self.settings.research_mode == "disabled":
             return ArticleResearchContext(query=query, provider="disabled")
@@ -33,7 +33,7 @@ class ArticleResearchTool:
             error="Unsupported research mode.",
         )
 
-    def _build_query(self, request: GenerateArticleRequest) -> str:
+    def build_query(self, request: GenerateArticleRequest) -> str:
         keywords = " ".join(request.keywords)
         query = f"{request.topic} {keywords} {request.target_audience}".strip()
         return query[:400]

@@ -4,6 +4,7 @@ from app.schemas.article import GenerateArticleRequest
 from app.schemas.llm import ArticleCritiqueResult, ArticleValidationResult, LLMArticleOutput
 from app.schemas.research import ArticleResearchContext, SearchResult
 from app.services.article_agent_pipeline import ArticleAgentPipeline
+from app.services.article_agent_router import ArticleAgentRouter
 from app.services.article_validator import ArticleValidator
 
 
@@ -202,3 +203,62 @@ async def test_pipeline_passes_search_context_to_agents() -> None:
     assert result.research_context.results[0].title == "Research result"
     assert fake_llm.generate_provider == "fake-search"
     assert fake_llm.critique_provider == "fake-search"
+
+
+@pytest.mark.asyncio
+async def test_pipeline_skips_search_when_router_says_no() -> None:
+    class FakeResearchTool:
+        def __init__(self) -> None:
+            self.called = False
+
+        def build_query(self, request):  # type: ignore[no-untyped-def]
+            return request.topic
+
+        async def research(self, request):  # type: ignore[no-untyped-def]
+            self.called = True
+            return ArticleResearchContext(query=request.topic, provider="unexpected")
+
+    class FakeLLM:
+        def __init__(self) -> None:
+            self.generate_provider: str | None = None
+            self.critique_provider: str | None = None
+
+        async def generate_article(self, request, research_context=None):  # type: ignore[no-untyped-def]
+            self.generate_provider = research_context.provider
+            return _article("Initial")
+
+        async def critique_article(  # type: ignore[no-untyped-def]
+            self,
+            request,
+            article,
+            validation_result: ArticleValidationResult,
+            research_context=None,
+        ):
+            self.critique_provider = research_context.provider
+            return ArticleCritiqueResult(
+                passed=validation_result.passed,
+                summary="Ready without external search.",
+                issues=[],
+                recommendations=[],
+                requires_revision=False,
+            )
+
+        async def revise_article(self, **kwargs):  # type: ignore[no-untyped-def]
+            return _article("Unexpected")
+
+    fake_llm = FakeLLM()
+    fake_research_tool = FakeResearchTool()
+    pipeline = ArticleAgentPipeline(
+        llm_service=fake_llm,  # type: ignore[arg-type]
+        validator=ArticleValidator(),
+        research_tool=fake_research_tool,  # type: ignore[arg-type]
+        agent_router=ArticleAgentRouter(mode="never"),
+    )
+
+    result = await pipeline.run(_request())
+
+    assert fake_research_tool.called is False
+    assert result.research_context.provider == "router-skip"
+    assert result.research_context.error is not None
+    assert fake_llm.generate_provider == "router-skip"
+    assert fake_llm.critique_provider == "router-skip"

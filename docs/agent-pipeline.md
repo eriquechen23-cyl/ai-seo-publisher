@@ -12,6 +12,7 @@ Producer and Critique prompts.
 ```text
 ArticleWorkflowService
   -> ArticleAgentPipeline
+      -> Agent Router: decide whether a research tool is needed
       -> Research Tool: search topic + keywords
       -> Producer: generate_article with research context
       -> Validator: deterministic HTML, structure, keyword, and safety checks
@@ -29,6 +30,7 @@ Configure the tool in `backend/.env`:
 
 ```env
 RESEARCH_MODE=mock
+RESEARCH_ROUTER_MODE=auto
 SEARCH_API_KEY=
 SEARCH_API_BASE=https://api.search.brave.com/res/v1/web/search
 DUCKDUCKGO_SEARCH_URL=https://html.duckduckgo.com/html/
@@ -43,9 +45,16 @@ Modes:
 - `brave`: calls Brave Search API with `SEARCH_API_KEY`.
 - `duckduckgo`: fetches DuckDuckGo HTML search results without an API key and parses title, URL, and snippet.
 
+Router modes:
+
+- `auto`: rule-based routing. Calls tools for timely, comparative, research-sensitive, or multi-keyword SEO briefs.
+- `always`: always calls the configured research tool.
+- `never`: skips the research tool.
+
 ## Main Files
 
 - `backend/app/services/article_research_tool.py`: controlled Search API Tool.
+- `backend/app/services/article_agent_router.py`: rule-based router for deciding whether the tool is needed.
 - `backend/app/schemas/research.py`: `SearchResult` and `ArticleResearchContext`.
 - `backend/app/services/article_agent_pipeline.py`: Researcher / Producer / Critique orchestration.
 - `backend/app/services/llm_service.py`: producer, critique, and revision LLM entrypoints.

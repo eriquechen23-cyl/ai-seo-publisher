@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     llm_timeout_seconds: int = 30
 
     research_mode: Literal["disabled", "mock", "brave", "duckduckgo"] = "mock"
+    research_router_mode: Literal["auto", "always", "never"] = "auto"
     search_api_key: str = ""
     search_api_base: str = "https://api.search.brave.com/res/v1/web/search"
     duckduckgo_search_url: str = "https://html.duckduckgo.com/html/"
