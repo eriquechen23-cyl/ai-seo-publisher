@@ -81,6 +81,8 @@ async def test_pipeline_accepts_article_without_reflection() -> None:
     assert result.critique.passed is True
     assert fake_llm.revise_count == 0
     assert result.research_context.provider == "none"
+    assert result.route_decision.use_research_tool is False
+    assert result.route_decision.matched_rules == ["tool:none"]
     assert fake_llm.research_provider == "none"
     assert validations == ["validating"]
     assert reflections == []
@@ -197,10 +199,20 @@ async def test_pipeline_passes_search_context_to_agents() -> None:
         research_tool=FakeResearchTool(),  # type: ignore[arg-type]
     )
 
-    result = await pipeline.run(_request())
+    research_events: list[tuple[str, bool]] = []
+
+    result = await pipeline.run(
+        _request(),
+        on_research_complete=lambda context, decision: research_events.append(
+            (context.provider, decision.use_research_tool)
+        ),
+    )
 
     assert result.research_context.provider == "fake-search"
     assert result.research_context.results[0].title == "Research result"
+    assert result.route_decision.use_research_tool is True
+    assert result.route_decision.matched_rules == ["mode:always"]
+    assert research_events == [("fake-search", True)]
     assert fake_llm.generate_provider == "fake-search"
     assert fake_llm.critique_provider == "fake-search"
 
@@ -260,5 +272,7 @@ async def test_pipeline_skips_search_when_router_says_no() -> None:
     assert fake_research_tool.called is False
     assert result.research_context.provider == "router-skip"
     assert result.research_context.error is not None
+    assert result.route_decision.use_research_tool is False
+    assert result.route_decision.matched_rules == ["mode:never"]
     assert fake_llm.generate_provider == "router-skip"
     assert fake_llm.critique_provider == "router-skip"

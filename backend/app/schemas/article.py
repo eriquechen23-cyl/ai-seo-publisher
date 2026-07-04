@@ -50,6 +50,16 @@ class ArticleJobError(BaseModel):
     retryable: bool
 
 
+class ArticleToolStatus(BaseModel):
+    research_tool_called: bool
+    router_reason: str | None = None
+    router_rules: list[str] = Field(default_factory=list)
+    provider: str | None = None
+    query: str | None = None
+    result_count: int = 0
+    error: str | None = None
+
+
 class ArticleJobResponse(BaseModel):
     job_id: str
     status: ArticleJobStatus
@@ -57,4 +67,5 @@ class ArticleJobResponse(BaseModel):
     wordpress_post_id: int | None = None
     wordpress_status: str | None = None
     wordpress_edit_url: HttpUrl | str | None = None
+    tool_status: ArticleToolStatus | None = None
     error: ArticleJobError | None = None

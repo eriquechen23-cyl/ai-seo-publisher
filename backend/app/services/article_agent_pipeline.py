@@ -7,13 +7,14 @@ from app.core.exceptions import AppError, ErrorCode
 from app.schemas.article import GenerateArticleRequest
 from app.schemas.llm import ArticleCritiqueResult, ArticleValidationResult, LLMArticleOutput
 from app.schemas.research import ArticleResearchContext
-from app.services.article_agent_router import ArticleAgentRouter
+from app.services.article_agent_router import AgentRouteDecision, ArticleAgentRouter
 from app.services.article_research_tool import ArticleResearchTool
 from app.services.article_validator import ArticleValidator
 from app.services.llm_service import LLMService
 
 
 StatusCallback = Callable[[], None]
+ResearchCallback = Callable[[ArticleResearchContext, AgentRouteDecision], None]
 
 
 @dataclass(frozen=True)
@@ -23,6 +24,7 @@ class ArticleAgentPipelineResult:
     critique: ArticleCritiqueResult
     reflection_count: int
     research_context: ArticleResearchContext
+    route_decision: AgentRouteDecision
 
 
 class ArticleAgentPipeline:
@@ -47,8 +49,10 @@ class ArticleAgentPipeline:
         *,
         on_validating: StatusCallback | None = None,
         on_reflection: StatusCallback | None = None,
+        on_research_complete: ResearchCallback | None = None,
     ) -> ArticleAgentPipelineResult:
-        research_context = await self._research(request)
+        research_context, route_decision = await self._research(request)
+        self._notify_research(on_research_complete, research_context, route_decision)
         article = await self.llm_service.generate_article(
             request,
             research_context=research_context,
@@ -72,6 +76,7 @@ class ArticleAgentPipeline:
                     critique=critique,
                     reflection_count=reflection_count,
                     research_context=research_context,
+                    route_decision=route_decision,
                 )
 
             if reflection_count >= self.max_reflections:
@@ -97,19 +102,30 @@ class ArticleAgentPipeline:
                 research_context=research_context,
             )
 
-    async def _research(self, request: GenerateArticleRequest) -> ArticleResearchContext:
+    async def _research(
+        self,
+        request: GenerateArticleRequest,
+    ) -> tuple[ArticleResearchContext, AgentRouteDecision]:
         if self.research_tool is None:
-            return ArticleResearchContext(query="", provider="none")
+            decision = AgentRouteDecision(
+                use_research_tool=False,
+                reason="No research tool is configured.",
+                matched_rules=["tool:none"],
+            )
+            return ArticleResearchContext(query="", provider="none"), decision
 
         decision = self.agent_router.route(request)
         if not decision.use_research_tool:
-            return ArticleResearchContext(
-                query=self.research_tool.build_query(request),
-                provider="router-skip",
-                error=f"{decision.reason} Matched rules: {', '.join(decision.matched_rules)}",
+            return (
+                ArticleResearchContext(
+                    query=self.research_tool.build_query(request),
+                    provider="router-skip",
+                    error=f"{decision.reason} Matched rules: {', '.join(decision.matched_rules)}",
+                ),
+                decision,
             )
 
-        return await self.research_tool.research(request)
+        return await self.research_tool.research(request), decision
 
     @staticmethod
     def _is_publishable(
@@ -122,3 +138,12 @@ class ArticleAgentPipeline:
     def _notify(callback: StatusCallback | None) -> None:
         if callback is not None:
             callback()
+
+    @staticmethod
+    def _notify_research(
+        callback: ResearchCallback | None,
+        research_context: ArticleResearchContext,
+        route_decision: AgentRouteDecision,
+    ) -> None:
+        if callback is not None:
+            callback(research_context, route_decision)

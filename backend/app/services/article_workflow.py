@@ -1,3 +1,5 @@
+import json
+
 from fastapi import status
 
 from app.core.exceptions import AppError, ErrorCode
@@ -6,8 +8,11 @@ from app.schemas.article import (
     ArticleJobError,
     ArticleJobResponse,
     ArticleJobStatus,
+    ArticleToolStatus,
     GenerateArticleRequest,
 )
+from app.schemas.research import ArticleResearchContext
+from app.services.article_agent_router import AgentRouteDecision
 from app.schemas.llm import LLMArticleOutput
 from app.services.article_agent_pipeline import ArticleAgentPipeline
 from app.services.article_validator import ArticleValidator
@@ -47,6 +52,9 @@ class ArticleWorkflowService:
                     job_id, ArticleJobStatus.VALIDATING
                 ),
                 on_reflection=lambda: self.repository.mark_repairing(job_id),
+                on_research_complete=lambda research_context, route_decision: (
+                    self._persist_tool_status(job_id, research_context, route_decision)
+                ),
             )
             article = pipeline_result.article
 
@@ -118,7 +126,29 @@ class ArticleWorkflowService:
                 if job.wordpress_post_id is not None
                 else None
             ),
+            tool_status=self._tool_status_from_metadata(job.metadata_json),
             error=self._job_error(job.error_code, job.error_message),
+        )
+
+    def _persist_tool_status(
+        self,
+        job_id: str,
+        research_context: ArticleResearchContext,
+        route_decision: AgentRouteDecision,
+    ) -> None:
+        self.repository.update_metadata(
+            job_id,
+            {
+                "tool_status": {
+                    "research_tool_called": route_decision.use_research_tool,
+                    "router_reason": route_decision.reason,
+                    "router_rules": route_decision.matched_rules,
+                    "provider": research_context.provider,
+                    "query": research_context.query,
+                    "result_count": len(research_context.results),
+                    "error": research_context.error,
+                }
+            },
         )
 
     @staticmethod
@@ -147,3 +177,25 @@ class ArticleWorkflowService:
             message=error_message,
             retryable=error_code in {code.value for code in retryable_codes},
         )
+
+    @staticmethod
+    def _tool_status_from_metadata(metadata_json: str | None) -> ArticleToolStatus | None:
+        if not metadata_json:
+            return None
+
+        try:
+            metadata = json.loads(metadata_json)
+        except json.JSONDecodeError:
+            return None
+
+        if not isinstance(metadata, dict):
+            return None
+
+        tool_status = metadata.get("tool_status")
+        if not isinstance(tool_status, dict):
+            return None
+
+        try:
+            return ArticleToolStatus.model_validate(tool_status)
+        except ValueError:
+            return None

@@ -28,6 +28,16 @@ export type ArticleJobError = {
   retryable: boolean;
 };
 
+export type ArticleToolStatus = {
+  research_tool_called: boolean;
+  router_reason: string | null;
+  router_rules: string[];
+  provider: string | null;
+  query: string | null;
+  result_count: number;
+  error: string | null;
+};
+
 export type ArticleJobResponse = {
   job_id: string;
   status: ArticleJobStatus;
@@ -35,6 +45,7 @@ export type ArticleJobResponse = {
   wordpress_post_id: number | null;
   wordpress_status: string | null;
   wordpress_edit_url: string | null;
+  tool_status: ArticleToolStatus | null;
   error: ArticleJobError | null;
 };
 

@@ -38,10 +38,17 @@ def init_db(database_url: str) -> None:
                 wordpress_post_id INTEGER,
                 error_code TEXT,
                 error_message TEXT,
+                metadata_json TEXT,
                 reflection_count INTEGER NOT NULL DEFAULT 0,
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
             )
             """
         )
+        columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(article_jobs)").fetchall()
+        }
+        if "metadata_json" not in columns:
+            connection.execute("ALTER TABLE article_jobs ADD COLUMN metadata_json TEXT")
         connection.commit()

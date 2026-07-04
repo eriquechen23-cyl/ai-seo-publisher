@@ -285,6 +285,7 @@ export function ArticleForm() {
         wordpress_post_id: null,
         wordpress_status: null,
         wordpress_edit_url: null,
+        tool_status: null,
         error: null
       }
     : null;

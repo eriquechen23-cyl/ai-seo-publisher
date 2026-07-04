@@ -13,3 +13,4 @@ class ArticleJob:
     wordpress_post_id: int | None = None
     error_code: str | None = None
     error_message: str | None = None
+    metadata_json: str | None = None

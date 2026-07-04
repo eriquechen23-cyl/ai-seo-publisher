@@ -1,5 +1,6 @@
 import json
 import uuid
+from typing import Any
 from datetime import UTC, datetime
 
 from app.db.database import connect, init_db
@@ -44,7 +45,7 @@ class ArticleJobRepository:
             row = connection.execute(
                 """
                 SELECT id, status, reflection_count, generated_title, generated_html,
-                       wordpress_post_id, error_code, error_message
+                       wordpress_post_id, error_code, error_message, metadata_json
                 FROM article_jobs
                 WHERE id = ?
                 """,
@@ -63,6 +64,7 @@ class ArticleJobRepository:
             wordpress_post_id=row["wordpress_post_id"],
             error_code=row["error_code"],
             error_message=row["error_message"],
+            metadata_json=row["metadata_json"],
         )
 
     def update_status(self, job_id: str, status: ArticleJobStatus) -> None:
@@ -82,6 +84,26 @@ class ArticleJobRepository:
                 WHERE id = ?
                 """,
                 (ArticleJobStatus.REPAIRING, self._now(), job_id),
+            )
+            connection.commit()
+
+    def update_metadata(self, job_id: str, metadata: dict[str, Any]) -> None:
+        job = self.get(job_id)
+        current_metadata = self._decode_metadata(job.metadata_json if job else None)
+        current_metadata.update(metadata)
+
+        with connect(self.database_url) as connection:
+            connection.execute(
+                """
+                UPDATE article_jobs
+                SET metadata_json = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (
+                    json.dumps(current_metadata, ensure_ascii=False),
+                    self._now(),
+                    job_id,
+                ),
             )
             connection.commit()
 
@@ -139,3 +161,15 @@ class ArticleJobRepository:
     @staticmethod
     def _now() -> str:
         return datetime.now(UTC).isoformat()
+
+    @staticmethod
+    def _decode_metadata(metadata_json: str | None) -> dict[str, Any]:
+        if not metadata_json:
+            return {}
+
+        try:
+            metadata = json.loads(metadata_json)
+        except json.JSONDecodeError:
+            return {}
+
+        return metadata if isinstance(metadata, dict) else {}
