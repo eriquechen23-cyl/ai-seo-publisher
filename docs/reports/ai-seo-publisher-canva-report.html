@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI SEO Publisher 實作報告</title>
+    <style>
+      @page {
+        size: 13.333in 7.5in;
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        color: #0f172a;
+        background: #edf5f3;
+        font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+      }
+      .slide {
+        position: relative;
+        display: flex;
+        min-height: 7.5in;
+        width: 13.333in;
+        page-break-after: always;
+        overflow: hidden;
+        background: linear-gradient(135deg, #ffffff 0%, #f7fbfa 56%, #eef8f6 100%);
+        padding: 0.58in 0.68in;
+      }
+      .slide::after {
+        content: "";
+        position: absolute;
+        right: -1.5in;
+        bottom: -1.4in;
+        width: 4in;
+        height: 4in;
+        border-radius: 999px;
+        background: rgba(64, 190, 186, 0.16);
+      }
+      .content {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+      }
+      .kicker {
+        margin: 0 0 0.18in;
+        color: #15858a;
+        font-size: 0.16in;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      h1 {
+        max-width: 8.8in;
+        margin: 0;
+        font-size: 0.76in;
+        line-height: 1.04;
+        letter-spacing: 0;
+      }
+      h2 {
+        margin: 0 0 0.28in;
+        font-size: 0.46in;
+        line-height: 1.14;
+        letter-spacing: 0;
+      }
+      h3 {
+        margin: 0 0 0.11in;
+        color: #0f172a;
+        font-size: 0.21in;
+      }
+      p {
+        margin: 0;
+        color: #475569;
+        font-size: 0.2in;
+        line-height: 1.62;
+      }
+      .lead {
+        max-width: 7.4in;
+        margin-top: 0.24in;
+        font-size: 0.25in;
+        line-height: 1.56;
+      }
+      .grid {
+        display: grid;
+        gap: 0.18in;
+      }
+      .cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .card {
+        min-height: 1.18in;
+        border: 1px solid #dbe8e8;
+        border-radius: 0.1in;
+        background: rgba(255, 255, 255, 0.86);
+        padding: 0.22in;
+        box-shadow: 0 0.18in 0.45in rgba(15, 23, 42, 0.06);
+      }
+      .card p,
+      li {
+        color: #475569;
+        font-size: 0.17in;
+        line-height: 1.55;
+      }
+      ul {
+        margin: 0;
+        padding-left: 0.22in;
+      }
+      li + li {
+        margin-top: 0.07in;
+      }
+      .metric {
+        font-size: 0.42in;
+        font-weight: 900;
+        color: #0f172a;
+      }
+      .muted {
+        color: #64748b;
+      }
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.1in;
+        margin-top: 0.28in;
+      }
+      .tag {
+        border: 1px solid #bfe4e1;
+        border-radius: 999px;
+        background: #f2fbfa;
+        color: #13777d;
+        padding: 0.07in 0.14in;
+        font-size: 0.15in;
+        font-weight: 700;
+      }
+      .flow {
+        display: flex;
+        align-items: center;
+        gap: 0.08in;
+        margin-top: 0.24in;
+      }
+      .flow .step {
+        flex: 1;
+        min-height: 0.72in;
+        border-radius: 0.1in;
+        background: #ffffff;
+        border: 1px solid #dbe8e8;
+        padding: 0.12in;
+        text-align: center;
+        font-size: 0.15in;
+        font-weight: 800;
+        color: #0f172a;
+      }
+      .arrow {
+        color: #15939a;
+        font-size: 0.22in;
+        font-weight: 900;
+      }
+      .diagram {
+        display: grid;
+        grid-template-columns: 1.05fr 0.9fr;
+        gap: 0.26in;
+        align-items: center;
+      }
+      .panel {
+        border-radius: 0.14in;
+        background: #26333b;
+        padding: 0.28in;
+        color: white;
+        box-shadow: 0 0.2in 0.55in rgba(15, 23, 42, 0.16);
+      }
+      .panel h3,
+      .panel p,
+      .panel li {
+        color: white;
+      }
+      .code {
+        border-radius: 0.1in;
+        background: #f8fafc;
+        border: 1px solid #dbe8e8;
+        padding: 0.16in;
+        color: #334155;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 0.15in;
+        line-height: 1.5;
+      }
+      .footer {
+        position: absolute;
+        left: 0.68in;
+        right: 0.68in;
+        bottom: 0.34in;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        color: #94a3b8;
+        font-size: 0.13in;
+      }
+      .hero-visual {
+        position: absolute;
+        right: 0.68in;
+        top: 1.05in;
+        width: 4.25in;
+        height: 4.55in;
+        border-radius: 0.18in;
+        background:
+          linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(235, 250, 248, 0.92)),
+          repeating-linear-gradient(0deg, transparent 0 0.23in, rgba(38, 51, 59, 0.08) 0.23in 0.24in),
+          repeating-linear-gradient(90deg, transparent 0 0.23in, rgba(38, 51, 59, 0.08) 0.23in 0.24in);
+        border: 1px solid #dbe8e8;
+        box-shadow: 0 0.28in 0.8in rgba(15, 23, 42, 0.12);
+        padding: 0.35in;
+      }
+      .browser {
+        height: 2.75in;
+        border-radius: 0.12in;
+        background: #fff;
+        border: 0.12in solid #26333b;
+        padding: 0.2in;
+      }
+      .line {
+        height: 0.08in;
+        margin-bottom: 0.11in;
+        border-radius: 999px;
+        background: #dbe8e8;
+      }
+      .line.teal {
+        width: 66%;
+        background: #41beb9;
+      }
+      .phone {
+        position: absolute;
+        right: 0.42in;
+        bottom: 0.45in;
+        width: 1in;
+        height: 1.8in;
+        border: 0.1in solid #26333b;
+        border-radius: 0.18in;
+        background: #fff;
+        padding: 0.14in;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide">
+      <div class="content">
+        <p class="kicker">Full Stack Implementation Report</p>
+        <h1>AI SEO Publisher 實作報告</h1>
+        <p class="lead">
+          從文章 brief 到 WordPress 草稿的一站式 AI Agent SEO 發文流程，結合 Search Tool、Producer / Critique 反思、非同步狀態追蹤與 WordPress REST API。
+        </p>
+        <div class="tag-row">
+          <span class="tag">React</span><span class="tag">FastAPI</span><span class="tag">LLM Agent</span><span class="tag">DuckDuckGo Crawler</span><span class="tag">WordPress Draft</span>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="browser">
+          <div class="line teal"></div>
+          <div class="line"></div>
+          <div class="line"></div>
+          <div class="line" style="width: 72%"></div>
+          <div class="line teal" style="width: 48%; margin-top: .28in"></div>
+        </div>
+        <div class="phone">
+          <div class="line teal"></div>
+          <div class="line"></div>
+          <div class="line"></div>
+        </div>
+      </div>
+      <div class="footer"><span>AI SEO Publisher</span><span>01</span></div>
+    </section>
+
+    <section class="slide"><div class="content">
+      <p class="kicker">Problem</p><h2>專案要解決的問題</h2>
+      <div class="grid cols-2">
+        <div class="card"><h3>內容產製耗時</h3><p>SEO 文章需要搜尋資料、撰寫、檢查、修稿與發布，人工流程容易分散。</p></div>
+        <div class="card"><h3>生成內容需要審稿</h3><p>單次 LLM 生成不一定符合 SEO、HTML 結構、CTA 與品質需求。</p></div>
+        <div class="card"><h3>搜尋資料需要受控</h3><p>LLM 不應直接瀏覽網路；後端應限制查詢、結果數與注入內容。</p></div>
+        <div class="card"><h3>發布需要可追蹤</h3><p>非同步工作必須讓前端知道任務狀態、是否調用工具、最終是否建立草稿。</p></div>
+      </div>
+    </div><div class="footer"><span>Project Goals</span><span>02</span></div></section>
+
+    <section class="slide"><div class="content">
+      <p class="kicker">Architecture</p><h2>系統總覽</h2>
+      <div class="diagram">
+        <div>
+          <div class="flow"><div class="step">React SPA</div><span class="arrow">→</span><div class="step">FastAPI</div><span class="arrow">→</span><div class="step">SQLite Job</div></div>
+          <div class="flow"><div class="step">Agent Pipeline</div><span class="arrow">→</span><div class="step">LLM Service</div><span class="arrow">→</span><div class="step">WordPress REST</div></div>
+          <div class="flow"><div class="step">DuckDuckGo Crawler</div><span class="arrow">→</span><div class="step">Bounded Context</div><span class="arrow">→</span><div class="step">Draft Post</div></div>
+        </div>
+        <div class="panel"><h3>設計重點</h3><ul><li>前端只負責提交 brief 與 polling。</li><li>後端集中處理 routing、search、LLM 與 WordPress。</li><li>搜尋結果被正規化後才進 prompt。</li><li>最後建立 draft，保留人工審稿。</li></ul></div>
+      </div>
+    </div><div class="footer"><span>System Overview</span><span>03</span></div></section>
+
+    <section class="slide"><div class="content">
+      <p class="kicker">User Flow</p><h2>從 Brief 到 WordPress 草稿</h2>
+      <div class="flow"><div class="step">填入 Topic</div><span class="arrow">→</span><div class="step">送出任務</div><span class="arrow">→</span><div class="step">取得 job_id</div><span class="arrow">→</span><div class="step">前端 polling</div><span class="arrow">→</span><div class="step">開啟 Draft</div></div>
+      <div class="grid cols-3" style="margin-top:.42in">
+        <div class="card"><div class="metric">202</div><p>API 立即回傳 Accepted，避免長時間等待。</p></div>
+        <div class="card"><div class="metric">6</div><p>主要任務狀態：RECEIVED 到 COMPLETED。</p></div>
+        <div class="card"><div class="metric">Draft</div><p>WordPress 先建立草稿，避免未審稿直接發布。</p></div>
+      </div>
+    </div><div class="footer"><span>Workflow</span><span>04</span></div></section>
+
+    <section class="slide"><div class="content">
+      <p class="kicker">Agent Skill Pipeline</p><h2>可反思的生成流程</h2>
+      <div class="flow"><div class="step">Agent Router</div><span class="arrow">→</span><div class="step">Research Tool</div><span class="arrow">→</span><div class="step">Producer</div><span class="arrow">→</span><div class="step">Validator</div><span class="arrow">→</span><div class="step">Critique</div></div>
+      <div class="flow"><div class="step">Revision</div><span class="arrow">→</span><div class="step">Sanitizer</div><span class="arrow">→</span><div class="step">Final Validation</div><span class="arrow">→</span><div class="step">WordPress Draft</div></div>
+      <p class="lead">這不是單次 prompt，而是把搜尋、生成、檢查、評論與修稿拆成可追蹤的 pipeline。</p>
+    </div><div class="footer"><span>Agent Pipeline</span><span>05</span></div></section>
+
+    <section class="slide"><div class="content">
+      <p class="kicker">Search Tool</p><h2>DuckDuckGo Crawler，不需要 Search API Key</h2>
+      <div class="grid cols-2">
+        <div class="card"><h3>LLM 不直接瀏覽</h3><p>後端負責外部資料取得，避免讓模型有任意 browser / network 能力。</p></div>
+        <div class="card"><h3>Bounded Context</h3><p>只注入 query、provider、title、URL、snippet、result_count 與 error。</p></div>
+      </div>
+      <div class="code" style="margin-top:.28in">RESEARCH_MODE=duckduckgo<br>RESEARCH_ROUTER_MODE=auto<br>DUCKDUCKGO_SEARCH_URL=https://html.duckduckgo.com/html/<br>SEARCH_RESULT_COUNT=5</div>
+    </div><div class="footer"><span>Search-aware Generation</span><span>06</span></div></section>
+
+    <section class="slide"><div class="content">
+      <p class="kicker">Agent Router</p><h2>Rule-based 決定何時調用工具</h2>
+      <div class="grid cols-3">
+        <div class="card"><h3>auto</h3><p>根據文章 brief 自動判斷是否需要外部資料。</p></div>
+        <div class="card"><h3>always</h3><p>Demo 時固定調用 Search Tool，方便展示流程。</p></div>
+        <div class="card"><h3>never</h3><p>離線測試或避免外部請求時使用。</p></div>
+      </div>
+      <p class="lead">觸發規則包含時效、比較、SEO、AI、WordPress、REST API、SaaS、ESG 與多 keyword brief。</p>
+    </div><div class="footer"><span>Routing Skill</span><span>07</span></div></section>
+
+    <section class="slide"><div class="content">
+      <p class="kicker">Critic Pattern</p><h2>Producer + Critique 的反思回路</h2>
+      <div class="grid cols-2">
+        <div class="panel"><h3>Producer</h3><p>依 brief 與 research context 產出 WordPress-ready HTML、標題、CTA 與段落結構。</p></div>
+        <div class="panel"><h3>Critique</h3><p>檢查 SEO、HTML 結構、關鍵字使用、CTA、內容品質與是否需要 revision。</p></div>
+      </div>
+      <div class="card" style="margin-top:.28in"><p>Validator 做 deterministic checks；Critique 做語意品質判斷。兩者都通過才進入 WordPress draft。</p></div>
+    </div><div class="footer"><span>Reflection</span><span>08</span></div></section>
+
+    <section class="slide"><div class="content">
+      <p class="kicker">Async Status</p><h2>前端可得知是否調用 Tool</h2>
+      <div class="flow"><div class="step">RECEIVED</div><span class="arrow">→</span><div class="step">GENERATING</div><span class="arrow">→</span><div class="step">VALIDATING</div><span class="arrow">→</span><div class="step">REPAIRING</div><span class="arrow">→</span><div class="step">PUBLISHING</div></div>
+      <div class="grid cols-2" style="margin-top:.32in">
+        <div class="card"><h3>tool_status</h3><p>research_tool_called、provider、query、result_count、error。</p></div>
+        <div class="card"><h3>router trace</h3><p>router_reason 與 router_rules 讓使用者知道為什麼有或沒有調用 Search Tool。</p></div>
+      </div>
+    </div><div class="footer"><span>Observable Async Flow</span><span>09</span></div></section>
+
+    <section class="slide"><div class="content">
+      <p class="kicker">WordPress</p><h2>REST API 建立草稿，保留人工審稿</h2>
+      <div class="grid cols-3">
+        <div class="card"><h3>Application Password</h3><p>使用 WordPress 官方支援的 REST API 認證方式。</p></div>
+        <div class="card"><h3>Draft-first</h3><p>AI 只建立草稿，不直接公開發布。</p></div>
+        <div class="card"><h3>Edit URL</h3><p>完成後前端提供 WordPress 編輯連結。</p></div>
+      </div>
+    </div><div class="footer"><span>Publishing</span><span>10</span></div></section>
+
+    <section class="slide"><div class="content">
+      <p class="kicker">Security</p><h2>設定與敏感資訊保護</h2>
+      <div class="grid cols-2">
+        <div class="card"><h3>.env 不進 Git</h3><p>LLM key、WordPress app password 與本地 DB 都被 gitignore 排除。</p></div>
+        <div class="card"><h3>移除 Search API Key 範例</h3><p>使用 DuckDuckGo crawler，不需要 SEARCH_API_KEY。</p></div>
+        <div class="card"><h3>Secret Scan</h3><p>推送前掃描常見 token pattern，避免洩漏。</p></div>
+        <div class="card"><h3>Search Safety</h3><p>只保存摘要 metadata，不保存 API headers 或完整原始回應。</p></div>
+      </div>
+    </div><div class="footer"><span>Safety</span><span>11</span></div></section>
+
+    <section class="slide"><div class="content">
+      <p class="kicker">Verification</p><h2>測試與交付狀態</h2>
+      <div class="grid cols-4">
+        <div class="card"><div class="metric">18</div><p>Backend tests passed</p></div>
+        <div class="card"><div class="metric">Build</div><p>Frontend production build passed</p></div>
+        <div class="card"><div class="metric">Clean</div><p>Secret scan clean</p></div>
+        <div class="card"><div class="metric">GitHub</div><p>Commits pushed to main</p></div>
+      </div>
+      <div class="code" style="margin-top:.3in">d57f6aa Default research tool to DuckDuckGo crawler<br>e666c62 Show async search tool status<br>82e1955 Add rule-based agent router<br>c974eb0 Add DuckDuckGo research mode</div>
+    </div><div class="footer"><span>Validation</span><span>12</span></div></section>
+
+    <section class="slide"><div class="content">
+      <p class="kicker">Bonus</p><h2>加分項目對照</h2>
+      <div class="grid cols-2">
+        <div class="card"><h3>Agent Router</h3><p>規則路由決定是否需要 tool call，降低不必要搜尋。</p></div>
+        <div class="card"><h3>Search-aware Generation</h3><p>DuckDuckGo crawler 補外部資料，LLM 只接收整理後 context。</p></div>
+        <div class="card"><h3>Critic Pattern</h3><p>Producer / Critique / Revision 做反思生成。</p></div>
+        <div class="card"><h3>Async Observability</h3><p>前端可看 job 狀態與 tool_status。</p></div>
+      </div>
+    </div><div class="footer"><span>Highlights</span><span>13</span></div></section>
+
+    <section class="slide"><div class="content">
+      <p class="kicker">Productization</p><h2>下一步產品化方向</h2>
+      <div class="grid cols-2">
+        <div class="card"><h3>Redis Queue + Worker</h3><p>取代 BackgroundTasks，支援重試、排隊、水平擴展與較可靠的長任務處理。</p></div>
+        <div class="card"><h3>審稿畫面</h3><p>顯示 critique summary、問題、建議、引用來源與版本差異。</p></div>
+        <div class="card"><h3>可靠性</h3><p>job retry、timeout、dead letter queue、observability、成本追蹤。</p></div>
+        <div class="card"><h3>產品能力</h3><p>auth、多租戶、排程發文、source citations、品牌語氣管理。</p></div>
+      </div>
+    </div><div class="footer"><span>Next Step</span><span>14</span></div></section>
+
+    <section class="slide"><div class="content">
+      <p class="kicker">Conclusion</p><h2>結論</h2>
+      <p class="lead">AI SEO Publisher 已具備可 Demo 的端到端能力：前端任務建立、後端 Agent pipeline、DuckDuckGo crawler、Producer / Critique 反思、WordPress 草稿建立，以及可追蹤的 async job status。</p>
+      <div class="tag-row">
+        <span class="tag">Demo-ready</span><span class="tag">Extensible</span><span class="tag">Search-aware</span><span class="tag">Review-friendly</span><span class="tag">Productizable</span>
+      </div>
+    </div><div class="footer"><span>AI SEO Publisher</span><span>15</span></div></section>
+  </body>
+</html>
