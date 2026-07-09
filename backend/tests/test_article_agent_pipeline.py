@@ -1,5 +1,6 @@
 import pytest
 
+from app.core.exceptions import AppError, ErrorCode
 from app.schemas.article import GenerateArticleRequest
 from app.schemas.llm import ArticleCritiqueResult, ArticleValidationResult, LLMArticleOutput
 from app.schemas.research import ArticleResearchContext, SearchResult
@@ -146,6 +147,133 @@ async def test_pipeline_revises_when_critic_requires_revision() -> None:
     assert fake_llm.revise_count == 1
     assert validations == ["validating", "validating"]
     assert reflections == ["reflection"]
+
+
+@pytest.mark.asyncio
+async def test_pipeline_sends_first_validation_failure_to_critique_for_revision() -> None:
+    class FakeLLM:
+        def __init__(self) -> None:
+            self.critique_count = 0
+            self.revise_count = 0
+            self.first_validation_passed: bool | None = None
+
+        async def generate_article(self, request, research_context=None):  # type: ignore[no-untyped-def]
+            return LLMArticleOutput(
+                title="Initial draft",
+                content_html=(
+                    "<h1>Initial draft</h1>"
+                    "<p>This draft is long enough to parse but misses the required article "
+                    "structure and keyword coverage for the workflow.</p>"
+                ),
+            )
+
+        async def critique_article(  # type: ignore[no-untyped-def]
+            self,
+            request,
+            article,
+            validation_result: ArticleValidationResult,
+            research_context=None,
+        ):
+            self.critique_count += 1
+            if self.critique_count == 1:
+                self.first_validation_passed = validation_result.passed
+                return ArticleCritiqueResult(
+                    passed=False,
+                    summary="Validator found structure and keyword gaps.",
+                    issues=validation_result.errors
+                    + [
+                        f"Missing keyword: {keyword}"
+                        for keyword in validation_result.missing_keywords
+                    ],
+                    recommendations=["Revise the article until deterministic validation passes."],
+                    requires_revision=True,
+                )
+            return ArticleCritiqueResult(
+                passed=validation_result.passed,
+                summary="Revised article is ready.",
+                issues=[],
+                recommendations=[],
+                requires_revision=False,
+            )
+
+        async def revise_article(self, **kwargs):  # type: ignore[no-untyped-def]
+            self.revise_count += 1
+            return _article("Revised")
+
+    fake_llm = FakeLLM()
+    pipeline = ArticleAgentPipeline(
+        llm_service=fake_llm,  # type: ignore[arg-type]
+        validator=ArticleValidator(),
+    )
+
+    result = await pipeline.run(_request())
+
+    assert result.validation.passed is True
+    assert result.reflection_count == 1
+    assert fake_llm.first_validation_passed is False
+    assert fake_llm.critique_count == 2
+    assert fake_llm.revise_count == 1
+
+
+@pytest.mark.asyncio
+async def test_pipeline_fails_only_after_revised_article_still_fails_validation() -> None:
+    class FakeLLM:
+        def __init__(self) -> None:
+            self.critique_count = 0
+            self.revise_count = 0
+
+        async def generate_article(self, request, research_context=None):  # type: ignore[no-untyped-def]
+            return LLMArticleOutput(
+                title="Invalid draft",
+                content_html=(
+                    "<h1>Invalid draft</h1>"
+                    "<p>This draft has enough characters but still omits the requested keywords.</p>"
+                ),
+            )
+
+        async def critique_article(  # type: ignore[no-untyped-def]
+            self,
+            request,
+            article,
+            validation_result: ArticleValidationResult,
+            research_context=None,
+        ):
+            self.critique_count += 1
+            return ArticleCritiqueResult(
+                passed=False,
+                summary="Validator issues remain.",
+                issues=validation_result.errors
+                + [
+                    f"Missing keyword: {keyword}"
+                    for keyword in validation_result.missing_keywords
+                ],
+                recommendations=["Revise the article until deterministic validation passes."],
+                requires_revision=True,
+            )
+
+        async def revise_article(self, **kwargs):  # type: ignore[no-untyped-def]
+            self.revise_count += 1
+            return LLMArticleOutput(
+                title="Still invalid draft",
+                content_html=(
+                    "<h1>Still invalid draft</h1>"
+                    "<p>The revision is long enough to parse but still misses the required keywords.</p>"
+                ),
+            )
+
+    fake_llm = FakeLLM()
+    pipeline = ArticleAgentPipeline(
+        llm_service=fake_llm,  # type: ignore[arg-type]
+        validator=ArticleValidator(),
+    )
+
+    with pytest.raises(AppError) as exc_info:
+        await pipeline.run(_request())
+
+    assert exc_info.value.code == ErrorCode.ARTICLE_VALIDATION_FAILED
+    assert exc_info.value.details["reflection_count"] == 1
+    assert fake_llm.critique_count == 2
+    assert fake_llm.revise_count == 1
 
 
 @pytest.mark.asyncio

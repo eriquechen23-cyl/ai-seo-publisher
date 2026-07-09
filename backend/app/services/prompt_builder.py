@@ -1,3 +1,5 @@
+import json
+
 from app.schemas.article import GenerateArticleRequest
 from app.schemas.llm import ArticleCritiqueResult, ArticleValidationResult, LLMArticleOutput
 from app.schemas.research import ArticleResearchContext
@@ -33,14 +35,11 @@ class PromptBuilder:
                     "whether the draft is ready for WordPress publishing, and whether source-backed "
                     "claims are consistent with the provided research context.\n\n"
                     f"Deterministic validator result:\n{validation_result.model_dump_json()}\n\n"
-                    "Return only JSON with this schema:\n"
-                    "{\n"
-                    '  "passed": true,\n'
-                    '  "summary": "short critique summary",\n'
-                    '  "issues": ["specific issue"],\n'
-                    '  "recommendations": ["specific revision instruction"],\n'
-                    '  "requires_revision": false\n'
-                    "}"
+                    "Return exactly one valid JSON object that passes the CRITIQUE validator "
+                    "schema below. Do not wrap the JSON in Markdown. Do not include prose "
+                    "before or after the JSON. Do not add keys outside the schema.\n\n"
+                    "CRITIQUE validator JSON schema:\n"
+                    f"{self._critique_json_schema_text()}"
                 ),
             },
         ]
@@ -108,16 +107,15 @@ class PromptBuilder:
 
     @staticmethod
     def _producer_system_prompt() -> str:
-        return """
+        return f"""
 You are the PRODUCER agent for an SEO article workflow.
 Write useful, publication-ready WordPress article drafts.
-Return JSON only. Do not wrap the JSON in Markdown.
+Return exactly one valid JSON object that passes the ARTICLE validator schema below.
+Do not wrap the JSON in Markdown. Do not include prose before or after the JSON.
+Do not add keys outside the schema.
 
-JSON schema:
-{
-  "title": "article title",
-  "content_html": "<h1>...</h1><h2>...</h2><p>...</p><ul><li>...</li></ul>"
-}
+ARTICLE validator JSON schema:
+{PromptBuilder._article_json_schema_text()}
 
 Rules:
 1. Include every requested keyword naturally.
@@ -133,8 +131,24 @@ Rules:
 You are the CRITIQUE agent in a producer-critic article pipeline.
 You do not rewrite the article. You decide whether the draft is ready to publish and produce
 specific feedback the producer can act on.
-Return JSON only.
+Return exactly one valid JSON object only. Never use Markdown fences or wrapper text.
 """.strip()
+
+    @staticmethod
+    def _critique_json_schema_text() -> str:
+        return json.dumps(
+            ArticleCritiqueResult.model_json_schema(),
+            ensure_ascii=False,
+            indent=2,
+        )
+
+    @staticmethod
+    def _article_json_schema_text() -> str:
+        return json.dumps(
+            LLMArticleOutput.model_json_schema(),
+            ensure_ascii=False,
+            indent=2,
+        )
 
     @staticmethod
     def _article_brief(

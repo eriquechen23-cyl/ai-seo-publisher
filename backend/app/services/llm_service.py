@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 import httpx
 from fastapi import status
@@ -92,7 +93,11 @@ class LLMService:
     async def _generate_article_from_messages(
         self, messages: list[dict[str, str]]
     ) -> LLMArticleOutput:
-        payload = await self._generate_json_payload(messages)
+        payload = await self._generate_json_payload(
+            messages,
+            response_schema=LLMArticleOutput.model_json_schema(),
+            schema_name="llm_article_output",
+        )
         try:
             content = payload["choices"][0]["message"]["content"]
             decoded = json.loads(content)
@@ -108,7 +113,11 @@ class LLMService:
     async def _generate_critique_from_messages(
         self, messages: list[dict[str, str]]
     ) -> ArticleCritiqueResult:
-        payload = await self._generate_json_payload(messages)
+        payload = await self._generate_json_payload(
+            messages,
+            response_schema=ArticleCritiqueResult.model_json_schema(),
+            schema_name="article_critique_result",
+        )
         try:
             content = payload["choices"][0]["message"]["content"]
             decoded = json.loads(content)
@@ -121,7 +130,13 @@ class LLMService:
                 retryable=True,
             ) from exc
 
-    async def _generate_json_payload(self, messages: list[dict[str, str]]) -> dict:
+    async def _generate_json_payload(
+        self,
+        messages: list[dict[str, str]],
+        *,
+        response_schema: dict[str, Any] | None = None,
+        schema_name: str = "llm_response",
+    ) -> dict:
         if not self.settings.llm_api_key:
             raise AppError(
                 ErrorCode.LLM_INVALID_OUTPUT,
@@ -131,7 +146,11 @@ class LLMService:
             )
 
         try:
-            return await self._post_chat_completion(messages)
+            return await self._post_chat_completion(
+                messages,
+                response_schema=response_schema,
+                schema_name=schema_name,
+            )
         except RetryError as exc:
             if isinstance(exc.last_attempt.exception(), httpx.TimeoutException):
                 raise AppError(
@@ -155,9 +174,25 @@ class LLMService:
         retry=retry_if_exception_type(httpx.TimeoutException),
         reraise=False,
     )
-    async def _post_chat_completion(self, messages: list[dict[str, str]]) -> dict:
+    async def _post_chat_completion(
+        self,
+        messages: list[dict[str, str]],
+        *,
+        response_schema: dict[str, Any] | None = None,
+        schema_name: str = "llm_response",
+    ) -> dict:
         url = f"{self.settings.llm_api_base.rstrip('/')}/chat/completions"
         headers = {"Authorization": f"Bearer {self.settings.llm_api_key}"}
+        response_format: dict[str, Any] = {"type": "json_object"}
+        if response_schema is not None:
+            response_format = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": schema_name,
+                    "strict": True,
+                    "schema": response_schema,
+                },
+            }
         async with httpx.AsyncClient(timeout=self.settings.llm_timeout_seconds) as client:
             response = await client.post(
                 url,
@@ -166,7 +201,7 @@ class LLMService:
                     "model": self.settings.llm_model,
                     "messages": messages,
                     "temperature": 0.4,
-                    "response_format": {"type": "json_object"},
+                    "response_format": response_format,
                 },
             )
         response.raise_for_status()
